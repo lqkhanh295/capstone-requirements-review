@@ -4,7 +4,7 @@ import '../../theme/app_theme.dart';
 
 enum RequirementStatus { passed, needsReview, failed, notReviewed }
 
-class RequirementCard extends StatelessWidget {
+class RequirementCard extends StatefulWidget {
   final String id;
   final String title;
   final RequirementStatus status;
@@ -22,8 +22,15 @@ class RequirementCard extends StatelessWidget {
     required this.onTap,
   });
 
+  @override
+  State<RequirementCard> createState() => _RequirementCardState();
+}
+
+class _RequirementCardState extends State<RequirementCard> {
+  bool _isHovering = false;
+
   Color _getStatusColor() {
-    switch (status) {
+    switch (widget.status) {
       case RequirementStatus.passed:
         return AppTheme.statusPassed;
       case RequirementStatus.needsReview:
@@ -36,7 +43,7 @@ class RequirementCard extends StatelessWidget {
   }
 
   IconData _getStatusIcon() {
-    switch (status) {
+    switch (widget.status) {
       case RequirementStatus.passed:
         return LucideIcons.checkCircle;
       case RequirementStatus.needsReview:
@@ -50,67 +57,100 @@ class RequirementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.border.withOpacity(0.5) : AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-          border: Border.all(
-            color: isSelected ? AppTheme.textPrimary : AppTheme.border,
-            width: 1,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: widget.isSelected
+                ? AppTheme.surfaceHover
+                : (_isHovering ? AppTheme.surfaceHover.withValues(alpha: 0.5) : AppTheme.surface),
+            borderRadius: BorderRadius.circular(AppTheme.borderRadius),
+            border: Border.all(
+              color: widget.isSelected ? AppTheme.primary : AppTheme.border,
+              width: 1,
+            ),
+            // Minimalist Left Border Highlight for selection
+            boxShadow: widget.isSelected
+                ? [
+                    const BoxShadow(
+                      color: AppTheme.primary,
+                      offset: Offset(-2, 0),
+                      blurRadius: 0,
+                    )
+                  ]
+                : null,
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  _getStatusIcon(),
-                  color: _getStatusColor(),
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    id,
-                    style: AppTheme.codeTextStyle.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    _getStatusIcon(),
+                    color: _getStatusColor(),
+                    size: 16,
                   ),
-                ),
-                if (issueCount > 0)
+                  const SizedBox(width: 8),
+                  // ID Pill
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppTheme.statusFailed.withOpacity(0.1),
+                      color: AppTheme.background,
                       borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppTheme.border),
                     ),
                     child: Text(
-                      '$issueCount issue${issueCount > 1 ? 's' : ''}',
+                      widget.id,
                       style: AppTheme.codeTextStyle.copyWith(
-                        fontSize: 10,
-                        color: AppTheme.statusFailed,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary,
                       ),
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary,
+                  const Spacer(),
+                  if (widget.issueCount > 0)
+                    // Premium Issue Badge with Dot
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: AppTheme.statusFailed,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.issueCount} issue${widget.issueCount > 1 ? 's' : ''}',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontSize: 11,
+                            color: AppTheme.statusFailed,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+              const SizedBox(height: 10),
+              Text(
+                widget.title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: widget.isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
