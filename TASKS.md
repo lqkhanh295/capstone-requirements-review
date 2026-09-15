@@ -10,15 +10,15 @@
 
 | Thành viên | Vai trò chính | Module phụ trách | Các yêu cầu SRS (FR / NFR) |
 | :--- | :--- | :--- | :--- |
-| **Thành viên 1** | **Team Lead / Architecture & File Parsing** | Core Architecture, Document Engine & Parsers | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, NFR-004 |
-| **Thành viên 2** | **UI/UX Specialist & Navigation** | Base Theme, 3-Column Layout, Left Panel (Req List) | Section 5.1-5.5, FR-009 (List part), Section 7, Section 8, Section 9 |
-| **Thành viên 3** | **Workspace & Manual Review Engineer** | Middle Panel (Req Detail), Review & Comments | FR-008, FR-009 (Detail), FR-010, FR-011, Section 5.2 |
-| **Thành viên 4** | **AI Engine & AI Review Panel Engineer** | AI Service Abstraction, AI Review Panel | FR-012, FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, Section 4 |
-| **Thành viên 5** | **Dashboard, Report Export & QA/Packaging** | Review Dashboard, Export PDF/CSV, Windows Build | FR-020, Section 6.1, 6.2, NFR-001, NFR-002, NFR-003 |
+| **KHANH** | **Team Lead / Architecture & File Parsing** | Core Architecture, Document Engine & Parsers | FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, NFR-004 |
+| **KHOA** | **UI/UX Specialist & Navigation** | Base Theme, 3-Column Layout, Left Panel (Req List) | Section 5.1-5.5, FR-009 (List part), Section 7, Section 8, Section 9 |
+| **DAT** | **Workspace & Manual Review Engineer** | Middle Panel (Req Detail), Review & Comments | FR-008, FR-009 (Detail), FR-010, FR-011, Section 5.2 |
+| **THINH** | **AI Engine & AI Review Panel Engineer** | AI Service Abstraction, AI Review Panel | FR-012, FR-013, FR-014, FR-015, FR-016, FR-017, FR-018, FR-019, Section 4 |
+| **TRUNG** | **Dashboard, Report Export & QA/Packaging** | Review Dashboard, Export PDF/CSV, Windows Build | FR-020, Section 6.1, 6.2, NFR-001, NFR-002, NFR-003 |
 
 ---
 
-### 👤 THÀNH VIÊN 1: TEAM LEAD / ARCHITECTURE & CORE FILE PARSER
+### 👤 KHANH: TEAM LEAD / ARCHITECTURE & CORE FILE PARSER
 **Mục tiêu:** Xây dựng khung kiến trúc dự án, hệ thống dữ liệu cốt lõi và module import/đọc tài liệu.
 
 - **Nhiệm vụ cụ thể:**
@@ -43,7 +43,7 @@
 
 ---
 
-### 👤 THÀNH VIÊN 2: UI/UX SPECIALIST & REQUIREMENTS LIST PANEL
+### 👤 KHOA: UI/UX SPECIALIST & REQUIREMENTS LIST PANEL
 **Mục tiêu:** Xây dựng hệ thống Design System chuẩn IDE và toàn bộ Cột trái (Left Sidebar) quản lý danh sách yêu cầu.
 
 - **Nhiệm vụ cụ thể:**
@@ -68,7 +68,7 @@
 
 ---
 
-### 👤 THÀNH VIÊN 3: WORKSPACE DETAIL & MANUAL REVIEW WORKFLOW
+### 👤 DAT: WORKSPACE DETAIL & MANUAL REVIEW WORKFLOW
 **Mục tiêu:** Xây dựng Cột giữa (Main Content) hiển thị chi tiết Requirement và quy trình đánh giá thủ công của Reviewer.
 
 - **Nhiệm vụ cụ thể:**
@@ -90,7 +90,7 @@
 
 ---
 
-### 👤 THÀNH VIÊN 4: AI ANALYSIS INTEGRATION & AI REVIEW PANEL
+### 👤 THINH: AI ANALYSIS INTEGRATION & AI REVIEW PANEL
 **Mục tiêu:** Xây dựng module kết nối AI, phân tích chất lượng yêu cầu và toàn bộ Cột phải (AI Review Panel).
 
 - **Nhiệm vụ cụ thể:**
@@ -114,7 +114,7 @@
 
 ---
 
-### 👤 THÀNH VIÊN 5: REVIEW DASHBOARD, EXPORT & PACKAGING
+### 👤 TRUNG: REVIEW DASHBOARD, EXPORT & PACKAGING
 **Mục tiêu:** Xây dựng màn hình thống kê Dashboard, module xuất báo cáo chuyên nghiệp (PDF/CSV) và đóng gói app Windows.
 
 - **Nhiệm vụ cụ thể:**
