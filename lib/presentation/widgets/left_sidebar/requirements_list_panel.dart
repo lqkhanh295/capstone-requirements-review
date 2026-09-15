@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../theme/app_theme.dart';
 import 'requirement_card.dart';
 
@@ -73,9 +73,9 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
   Widget build(BuildContext context) {
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF): const Intent(SearchIntent),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): const Intent(ArrowUpIntent),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): const Intent(ArrowDownIntent),
+        LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF): const SearchIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const ArrowUpIntent(),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const ArrowDownIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
