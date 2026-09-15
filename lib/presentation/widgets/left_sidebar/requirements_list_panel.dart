@@ -86,7 +86,7 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
         child: Focus(
           autofocus: true,
           child: Container(
-            width: 240, // 220-240px as per requirements
+            width: 260, // Slightly wider for better breathing room
             decoration: const BoxDecoration(
               color: AppTheme.background,
               border: Border(
@@ -111,14 +111,31 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-      child: Text(
-        'REQUIREMENTS (${_mockRequirements.length})',
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontSize: 14,
-          letterSpacing: 0.5,
-          color: AppTheme.textSecondary,
-        ),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'REQUIREMENTS',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppTheme.textSecondary,
+              letterSpacing: 1.2,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.border,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${_mockRequirements.length}',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -129,29 +146,35 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
       child: TextField(
         controller: _searchController,
         focusNode: _searchFocusNode,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppTheme.textPrimary,
+        ),
         decoration: InputDecoration(
           hintText: 'Search (Ctrl+F)',
-          hintStyle: Theme.of(context).textTheme.bodyMedium,
+          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppTheme.textSecondary.withValues(alpha: 0.7),
+          ),
           prefixIcon: const Icon(LucideIcons.search, size: 16, color: AppTheme.textSecondary),
           isDense: true,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
         ),
       ),
     );
   }
 
   Widget _buildTabFilters() {
+    final tabs = ['All', 'Review', 'Failed'];
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceHover,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadius),
+          border: Border.all(color: AppTheme.border, width: 0.5),
+        ),
         child: Row(
-          children: [
-            _buildTab('All'),
-            const SizedBox(width: 8),
-            _buildTab('Needs Review'),
-            const SizedBox(width: 8),
-            _buildTab('Failed'),
-          ],
+          children: tabs.map((tab) => Expanded(child: _buildTab(tab))).toList(),
         ),
       ),
     );
@@ -159,24 +182,31 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
 
   Widget _buildTab(String title) {
     final isSelected = _selectedTab == title;
-    return InkWell(
+    return GestureDetector(
       onTap: () => setState(() => _selectedTab = title),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.textPrimary : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? AppTheme.textPrimary : AppTheme.border,
-          ),
+          color: isSelected ? AppTheme.surface : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadius - 2),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  )
+                ]
+              : [],
         ),
         child: Text(
           title,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: isSelected ? AppTheme.surface : AppTheme.textPrimary,
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            letterSpacing: 0,
           ),
         ),
       ),
@@ -187,7 +217,7 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: _mockRequirements.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final req = _mockRequirements[index];
         return RequirementCard(
