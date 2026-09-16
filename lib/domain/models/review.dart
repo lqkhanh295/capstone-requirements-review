@@ -44,6 +44,8 @@ class QualityScores {
   final int testability;
   final int consistency;
   final int feasibility;
+  final int ambiguity;
+  final int duplication;
 
   const QualityScores({
     required this.clarity,
@@ -51,6 +53,8 @@ class QualityScores {
     required this.testability,
     required this.consistency,
     required this.feasibility,
+    this.ambiguity = 85,
+    this.duplication = 90,
   });
 
   QualityScores copyWith({
@@ -59,6 +63,8 @@ class QualityScores {
     int? testability,
     int? consistency,
     int? feasibility,
+    int? ambiguity,
+    int? duplication,
   }) {
     return QualityScores(
       clarity: clarity ?? this.clarity,
@@ -66,6 +72,8 @@ class QualityScores {
       testability: testability ?? this.testability,
       consistency: consistency ?? this.consistency,
       feasibility: feasibility ?? this.feasibility,
+      ambiguity: ambiguity ?? this.ambiguity,
+      duplication: duplication ?? this.duplication,
     );
   }
 
@@ -76,6 +84,8 @@ class QualityScores {
       testability: (json['testability'] as num?)?.toInt() ?? 0,
       consistency: (json['consistency'] as num?)?.toInt() ?? 0,
       feasibility: (json['feasibility'] as num?)?.toInt() ?? 0,
+      ambiguity: (json['ambiguity'] as num?)?.toInt() ?? 85,
+      duplication: (json['duplication'] as num?)?.toInt() ?? 90,
     );
   }
 
@@ -85,6 +95,8 @@ class QualityScores {
     'testability': testability,
     'consistency': consistency,
     'feasibility': feasibility,
+    'ambiguity': ambiguity,
+    'duplication': duplication,
   };
 }
 

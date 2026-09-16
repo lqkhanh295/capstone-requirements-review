@@ -102,6 +102,23 @@ class DocumentNotifier extends Notifier<DocumentState> {
     );
   }
 
+  /// Update an entire requirement object (e.g. after AI analysis or suggestion applied)
+  void updateRequirement(Requirement updatedReq, [Document? customDoc, bool? customIsSelected]) {
+    if (state.document == null) return;
+
+    final updatedDoc = customDoc ?? state.document!.copyWith(
+      requirements: state.document!.requirements.map((r) => r.id == updatedReq.id ? updatedReq : r).toList(),
+    );
+
+    final isSelected = customIsSelected ?? (state.selectedRequirement?.id == updatedReq.id);
+    final updatedSelected = isSelected ? updatedReq : state.selectedRequirement;
+
+    state = state.copyWith(
+      document: updatedDoc,
+      selectedRequirement: updatedSelected,
+    );
+  }
+
   /// Reset to idle
   void reset() {
     state = const DocumentState();
