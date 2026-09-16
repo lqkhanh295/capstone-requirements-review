@@ -7,6 +7,7 @@ import 'domain/models/models.dart';
 import 'presentation/providers/document_provider.dart';
 import 'presentation/providers/document_state.dart';
 import 'presentation/widgets/file_drop_zone.dart';
+import 'presentation/widgets/requirement_detail_panel.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -173,7 +174,19 @@ class HomeScreen extends ConsumerWidget {
       children: [
         _buildDocumentHeader(doc),
         Expanded(
-          child: _buildRequirementsList(context, ref, state),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 320,
+                child: _buildRequirementsList(context, ref, state),
+              ),
+              const VerticalDivider(width: 1),
+              const Expanded(
+                child: RequirementDetailPanel(),
+              ),
+            ],
+          ),
         ),
       ],
     );
