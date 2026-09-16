@@ -12,10 +12,12 @@ class RequirementDetailPanel extends ConsumerStatefulWidget {
   const RequirementDetailPanel({super.key});
 
   @override
-  ConsumerState<RequirementDetailPanel> createState() => _RequirementDetailPanelState();
+  ConsumerState<RequirementDetailPanel> createState() =>
+      _RequirementDetailPanelState();
 }
 
-class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel> {
+class _RequirementDetailPanelState
+    extends ConsumerState<RequirementDetailPanel> {
   final TextEditingController _commentController = TextEditingController();
   final TextEditingController _editCommentController = TextEditingController();
   String? _editingCommentId;
@@ -47,7 +49,8 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
 
     return CallbackShortcuts(
       bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyS, control: true): () => _saveReviewSession(context),
+        const SingleActivator(LogicalKeyboardKey.keyS, control: true): () =>
+            _saveReviewSession(context),
       },
       child: Focus(
         autofocus: true,
@@ -87,7 +90,11 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(LucideIcons.mousePointerClick, size: 48, color: AppTheme.textMuted.withValues(alpha: 0.5)),
+            Icon(
+              LucideIcons.mousePointerClick,
+              size: 48,
+              color: AppTheme.textMuted.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: AppTheme.space16),
             const Text(
               'Chưa chọn Requirement',
@@ -100,10 +107,7 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
             const SizedBox(height: AppTheme.space8),
             const Text(
               'Chọn một yêu cầu từ danh sách bên trái để xem chi tiết',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.textMuted,
-              ),
+              style: TextStyle(fontSize: 14, color: AppTheme.textMuted),
             ),
           ],
         ),
@@ -113,7 +117,10 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
 
   Widget _buildHeader(Requirement req) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.space24, vertical: AppTheme.space16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.space24,
+        vertical: AppTheme.space16,
+      ),
       color: AppTheme.background,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,11 +148,18 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
               _buildTypeBadge(req.type),
               const Spacer(),
               if (req.sourceLocation.isNotEmpty) ...[
-                const Icon(LucideIcons.fileText, size: 14, color: AppTheme.textMuted),
+                const Icon(
+                  LucideIcons.fileText,
+                  size: 14,
+                  color: AppTheme.textMuted,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Trang ${req.sourceLocation}',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ],
@@ -197,11 +211,7 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
       ),
       child: Text(
         type.label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: fg,
-        ),
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
       ),
     );
   }
@@ -229,7 +239,9 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
             border: Border.all(color: AppTheme.borderLight),
           ),
           child: Text(
-            req.description.isNotEmpty ? req.description : 'Không có mô tả chi tiết.',
+            req.description.isNotEmpty
+                ? req.description
+                : 'Không có mô tả chi tiết.',
             style: const TextStyle(
               fontSize: 14,
               color: AppTheme.textPrimary,
@@ -267,7 +279,11 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
     );
   }
 
-  Widget _buildStatusButton(ReviewStatus status, bool isSelected, String reqId) {
+  Widget _buildStatusButton(
+    ReviewStatus status,
+    bool isSelected,
+    String reqId,
+  ) {
     Color activeColor;
     IconData icon;
 
@@ -285,7 +301,6 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
         icon = LucideIcons.xCircle;
         break;
       case ReviewStatus.notReviewed:
-      default:
         activeColor = AppTheme.statusNotReviewed;
         icon = LucideIcons.helpCircle;
         break;
@@ -293,13 +308,20 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
 
     return InkWell(
       onTap: () {
-        ref.read(documentProvider.notifier).updateRequirementStatus(reqId, status);
+        ref
+            .read(documentProvider.notifier)
+            .updateRequirementStatus(reqId, status);
       },
       borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppTheme.space16, vertical: AppTheme.space12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.space16,
+          vertical: AppTheme.space12,
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor.withValues(alpha: 0.1) : AppTheme.surface,
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.1)
+              : AppTheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
             color: isSelected ? activeColor : AppTheme.border,
@@ -348,7 +370,8 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: req.comments.length,
-            separatorBuilder: (context, index) => const SizedBox(height: AppTheme.space12),
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: AppTheme.space12),
             itemBuilder: (context, index) {
               final comment = req.comments[index];
               return _buildCommentItem(req.id, comment);
@@ -378,12 +401,19 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
               CircleAvatar(
                 radius: 12,
                 backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-                child: const Icon(LucideIcons.user, size: 14, color: AppTheme.primary),
+                child: const Icon(
+                  LucideIcons.user,
+                  size: 14,
+                  color: AppTheme.primary,
+                ),
               ),
               const SizedBox(width: AppTheme.space8),
               Text(
                 comment.author,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(width: AppTheme.space8),
               Text(
@@ -395,14 +425,22 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
                 InkWell(
                   onTap: () {
                     if (_editCommentController.text.trim().isNotEmpty) {
-                      final updatedComment = comment.copyWith(text: _editCommentController.text.trim());
-                      ref.read(documentProvider.notifier).updateComment(reqId, updatedComment);
+                      final updatedComment = comment.copyWith(
+                        text: _editCommentController.text.trim(),
+                      );
+                      ref
+                          .read(documentProvider.notifier)
+                          .updateComment(reqId, updatedComment);
                     }
                     setState(() {
                       _editingCommentId = null;
                     });
                   },
-                  child: const Icon(LucideIcons.check, size: 14, color: AppTheme.statusPassed),
+                  child: const Icon(
+                    LucideIcons.check,
+                    size: 14,
+                    color: AppTheme.statusPassed,
+                  ),
                 ),
                 const SizedBox(width: AppTheme.space12),
                 InkWell(
@@ -411,7 +449,11 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
                       _editingCommentId = null;
                     });
                   },
-                  child: const Icon(LucideIcons.x, size: 14, color: AppTheme.textMuted),
+                  child: const Icon(
+                    LucideIcons.x,
+                    size: 14,
+                    color: AppTheme.textMuted,
+                  ),
                 ),
               ] else ...[
                 InkWell(
@@ -421,14 +463,24 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
                       _editCommentController.text = comment.text;
                     });
                   },
-                  child: const Icon(LucideIcons.pencil, size: 14, color: AppTheme.textMuted),
+                  child: const Icon(
+                    LucideIcons.pencil,
+                    size: 14,
+                    color: AppTheme.textMuted,
+                  ),
                 ),
                 const SizedBox(width: AppTheme.space12),
                 InkWell(
                   onTap: () {
-                    ref.read(documentProvider.notifier).deleteComment(reqId, comment.id);
+                    ref
+                        .read(documentProvider.notifier)
+                        .deleteComment(reqId, comment.id);
                   },
-                  child: const Icon(LucideIcons.trash2, size: 14, color: AppTheme.textMuted),
+                  child: const Icon(
+                    LucideIcons.trash2,
+                    size: 14,
+                    color: AppTheme.textMuted,
+                  ),
                 ),
               ],
             ],
@@ -494,7 +546,10 @@ class _RequirementDetailPanelState extends ConsumerState<RequirementDetailPanel>
               ref.read(documentProvider.notifier).addComment(reqId, newComment);
               _commentController.clear();
             },
-            icon: const Icon(LucideIcons.sendHorizonal, color: AppTheme.primary),
+            icon: const Icon(
+              LucideIcons.sendHorizonal,
+              color: AppTheme.primary,
+            ),
             splashRadius: 20,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
