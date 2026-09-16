@@ -58,21 +58,29 @@ class HomeScreen extends ConsumerWidget {
           appBar: AppBar(
             backgroundColor: AppTheme.surface,
             elevation: 0,
-            title: Row(
+            title: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(LucideIcons.fileSearch, color: AppTheme.primary, size: 22),
-                const SizedBox(width: AppTheme.space12),
-                const Text(
-                  'Capstone Requirements Review',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
+                Icon(LucideIcons.fileSearch, color: AppTheme.primary, size: 22),
+                SizedBox(width: AppTheme.space12),
+                Flexible(
+                  child: Text(
+                    'Capstone Requirements Review',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
-                const SizedBox(width: AppTheme.space16),
-                // AI Status Pill
-                InkWell(
+              ],
+            ),
+            actions: [
+              // AI Status Pill
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: InkWell(
                   onTap: () => AISettingsDialog.show(context),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                   child: Container(
@@ -83,6 +91,7 @@ class HomeScreen extends ConsumerWidget {
                       border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
                     ),
                     child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(LucideIcons.sparkles, size: 14, color: AppTheme.primary),
                         const SizedBox(width: 6),
@@ -100,24 +109,25 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const Spacer(),
-                if (docState.hasDocument) ...[
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      ref.read(documentProvider.notifier).reset();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppTheme.border),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                      ),
+              ),
+              const SizedBox(width: AppTheme.space12),
+              if (docState.hasDocument) ...[
+                OutlinedButton.icon(
+                  onPressed: () {
+                    ref.read(documentProvider.notifier).reset();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppTheme.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                     ),
-                    icon: const Icon(LucideIcons.folderOpen, size: 16),
-                    label: const Text('Mở tài liệu khác'),
                   ),
-                ],
+                  icon: const Icon(LucideIcons.folderOpen, size: 16),
+                  label: const Text('Mở tài liệu khác'),
+                ),
+                const SizedBox(width: AppTheme.space12),
               ],
-            ),
+            ],
             bottom: const PreferredSize(
               preferredSize: Size.fromHeight(1),
               child: Divider(height: 1, color: AppTheme.border),
