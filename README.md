@@ -43,7 +43,23 @@ For a complete breakdown of features, functional requirements (FR-001 to FR-020)
    flutter pub get
    ```
 
-3. Run the Windows Desktop app:
+3. Run unit tests:
+   ```bash
+   flutter test test/dashboard_export_test.dart
+   ```
+
+4. Run the Windows Desktop app:
    ```bash
    flutter run -d windows
    ```
+
+---
+
+## 📊 Dashboard, Export & Packaging Features (Member 5 - TRUNG)
+- **Review Dashboard (SRS Section 6.1):** Summarizes document metadata, requirement counts by status (`Passed`, `Needs Review`, `Failed`, `Not Reviewed`), Overall Quality Score circular gauge indicator, and recent critical issues list.
+- **Export Report Module (FR-020, SRS Section 6.2):**
+  - **PDF Export:** Print-ready document with cover page, summary table, quality scores breakdown, and requirement details list.
+  - **CSV Export:** Tabular format compatible with MS Excel.
+  - **Shortcut `Ctrl + E`:** Instant keyboard shortcut trigger for Export modal popup.
+- **Performance & Packaging:** Isolate background execution (`compute`), minimum window size (`1200x800`), and production Windows Desktop release build instructions. For detailed build instructions, see [PACKAGING_GUIDE.md](PACKAGING_GUIDE.md).
+
