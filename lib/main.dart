@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'core/theme/app_theme.dart';
 import 'domain/models/models.dart';
+import 'presentation/providers/ai_providers.dart';
 import 'presentation/providers/document_provider.dart';
 import 'presentation/providers/document_state.dart';
+import 'presentation/widgets/ai_review_panel.dart';
+import 'presentation/widgets/ai_settings_dialog.dart';
 import 'presentation/widgets/file_drop_zone.dart';
 import 'presentation/widgets/requirement_detail_panel.dart';
 
@@ -38,48 +42,101 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final docState = ref.watch(documentProvider);
+    final aiConfig = ref.watch(aiConfigProvider);
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        backgroundColor: AppTheme.surface,
-        elevation: 0,
-        title: Row(
-          children: [
-            const Icon(LucideIcons.fileSearch, color: AppTheme.primary, size: 22),
-            const SizedBox(width: AppTheme.space12),
-            const Text(
-              'Capstone Requirements Review',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const Spacer(),
-            if (docState.hasDocument) ...[
-              OutlinedButton.icon(
-                onPressed: () {
-                  ref.read(documentProvider.notifier).reset();
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppTheme.border),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.enter, control: true): () {
+          if (docState.selectedRequirement != null) {
+            ref.read(aiReviewProvider.notifier).analyzeRequirement(docState.selectedRequirement!);
+          }
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          backgroundColor: AppTheme.background,
+          appBar: AppBar(
+            backgroundColor: AppTheme.surface,
+            elevation: 0,
+            title: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.fileSearch, color: AppTheme.primary, size: 22),
+                SizedBox(width: AppTheme.space12),
+                Flexible(
+                  child: Text(
+                    'Capstone Requirements Review',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                 ),
-                icon: const Icon(LucideIcons.folderOpen, size: 16),
-                label: const Text('Mở tài liệu khác'),
+              ],
+            ),
+            actions: [
+              // AI Status Pill
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: InkWell(
+                  onTap: () => AISettingsDialog.show(context),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(LucideIcons.sparkles, size: 14, color: AppTheme.primary),
+                        const SizedBox(width: 6),
+                        Text(
+                          'AI: ${aiConfig.provider.label}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(LucideIcons.chevronDown, size: 12, color: AppTheme.primary),
+                      ],
+                    ),
+                  ),
+                ),
               ),
+              const SizedBox(width: AppTheme.space12),
+              if (docState.hasDocument) ...[
+                OutlinedButton.icon(
+                  onPressed: () {
+                    ref.read(documentProvider.notifier).reset();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppTheme.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                  icon: const Icon(LucideIcons.folderOpen, size: 16),
+                  label: const Text('Mở tài liệu khác'),
+                ),
+                const SizedBox(width: AppTheme.space12),
+              ],
             ],
-          ],
-        ),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(height: 1, color: AppTheme.border),
+            bottom: const PreferredSize(
+              preferredSize: Size.fromHeight(1),
+              child: Divider(height: 1, color: AppTheme.border),
+            ),
+          ),
+          body: _buildBody(context, ref, docState),
         ),
       ),
-      body: _buildBody(context, ref, docState),
     );
   }
 
@@ -168,22 +225,29 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    // Document loaded state
+    // Document loaded state with 2-panel workspace layout (List + AI Review Panel)
     final doc = state.document!;
     return Column(
       children: [
         _buildDocumentHeader(doc),
         Expanded(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Left Column: Requirements List
               SizedBox(
-                width: 320,
+                width: 300,
                 child: _buildRequirementsList(context, ref, state),
               ),
               const VerticalDivider(width: 1),
+              // Middle Column: Requirement Detail & Manual Review
               const Expanded(
                 child: RequirementDetailPanel(),
+              ),
+              const VerticalDivider(width: 1),
+              // Right Column: AI Review Panel
+              AIReviewPanel(
+                requirement: state.selectedRequirement,
               ),
             ],
           ),
@@ -333,6 +397,8 @@ class HomeScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: AppTheme.space8),
                     _buildTypeChip(req.type),
+                    const SizedBox(width: AppTheme.space8),
+                    _buildStatusBadge(req),
                     const Spacer(),
                     if (req.sourceLocation.isNotEmpty)
                       Row(
@@ -373,6 +439,78 @@ class HomeScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStatusBadge(Requirement req) {
+    if (req.review != null) {
+      final score = req.review!.overallScore;
+      Color color;
+      if (score >= 80) {
+        color = AppTheme.statusPassed;
+      } else if (score >= 50) {
+        color = AppTheme.statusNeedsReview;
+      } else {
+        color = AppTheme.statusFailed;
+      }
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.sparkles, size: 10, color: AppTheme.primary),
+            const SizedBox(width: 4),
+            Text(
+              '$score/100',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontFamily: 'JetBrainsMono',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Manual status
+    Color statusColor;
+    switch (req.status) {
+      case ReviewStatus.passed:
+        statusColor = AppTheme.statusPassed;
+        break;
+      case ReviewStatus.needsReview:
+        statusColor = AppTheme.statusNeedsReview;
+        break;
+      case ReviewStatus.failed:
+        statusColor = AppTheme.statusFailed;
+        break;
+      case ReviewStatus.notReviewed:
+        statusColor = AppTheme.textMuted;
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+      ),
+      child: Text(
+        req.status.label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+          color: statusColor,
+        ),
+      ),
     );
   }
 
