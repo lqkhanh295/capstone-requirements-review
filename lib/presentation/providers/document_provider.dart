@@ -119,6 +119,85 @@ class DocumentNotifier extends Notifier<DocumentState> {
     );
   }
 
+  /// Add a comment to a requirement
+  void addComment(String reqId, ReviewComment comment) {
+    if (state.document == null) return;
+
+    final updatedList = state.document!.requirements.map((req) {
+      if (req.id == reqId) {
+        final updatedComments = List<ReviewComment>.from(req.comments)..add(comment);
+        return req.copyWith(comments: updatedComments);
+      }
+      return req;
+    }).toList();
+
+    final updatedDoc = state.document!.copyWith(requirements: updatedList);
+    final updatedSelected = state.selectedRequirement?.id == reqId
+        ? state.selectedRequirement!.copyWith(
+            comments: List<ReviewComment>.from(state.selectedRequirement!.comments)..add(comment),
+          )
+        : state.selectedRequirement;
+
+    state = state.copyWith(
+      document: updatedDoc,
+      selectedRequirement: updatedSelected,
+    );
+  }
+
+  /// Update an existing comment
+  void updateComment(String reqId, ReviewComment updatedComment) {
+    if (state.document == null) return;
+
+    final updatedList = state.document!.requirements.map((req) {
+      if (req.id == reqId) {
+        final updatedComments = req.comments.map((c) {
+          return c.id == updatedComment.id ? updatedComment : c;
+        }).toList();
+        return req.copyWith(comments: updatedComments);
+      }
+      return req;
+    }).toList();
+
+    final updatedDoc = state.document!.copyWith(requirements: updatedList);
+    final updatedSelected = state.selectedRequirement?.id == reqId
+        ? state.selectedRequirement!.copyWith(
+            comments: state.selectedRequirement!.comments.map((c) {
+              return c.id == updatedComment.id ? updatedComment : c;
+            }).toList(),
+          )
+        : state.selectedRequirement;
+
+    state = state.copyWith(
+      document: updatedDoc,
+      selectedRequirement: updatedSelected,
+    );
+  }
+
+  /// Delete a comment
+  void deleteComment(String reqId, String commentId) {
+    if (state.document == null) return;
+
+    final updatedList = state.document!.requirements.map((req) {
+      if (req.id == reqId) {
+        final updatedComments = req.comments.where((c) => c.id != commentId).toList();
+        return req.copyWith(comments: updatedComments);
+      }
+      return req;
+    }).toList();
+
+    final updatedDoc = state.document!.copyWith(requirements: updatedList);
+    final updatedSelected = state.selectedRequirement?.id == reqId
+        ? state.selectedRequirement!.copyWith(
+            comments: state.selectedRequirement!.comments.where((c) => c.id != commentId).toList(),
+          )
+        : state.selectedRequirement;
+
+    state = state.copyWith(
+      document: updatedDoc,
+      selectedRequirement: updatedSelected,
+    );
+  }
+
   /// Reset to idle
   void reset() {
     state = const DocumentState();

@@ -11,6 +11,7 @@ import 'presentation/providers/document_state.dart';
 import 'presentation/widgets/ai_review_panel.dart';
 import 'presentation/widgets/ai_settings_dialog.dart';
 import 'presentation/widgets/file_drop_zone.dart';
+import 'presentation/widgets/requirement_detail_panel.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -233,10 +234,17 @@ class HomeScreen extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Left / Middle Content: Requirements List
-              Expanded(
+              // Left Column: Requirements List
+              SizedBox(
+                width: 300,
                 child: _buildRequirementsList(context, ref, state),
               ),
+              const VerticalDivider(width: 1),
+              // Middle Column: Requirement Detail & Manual Review
+              const Expanded(
+                child: RequirementDetailPanel(),
+              ),
+              const VerticalDivider(width: 1),
               // Right Column: AI Review Panel
               AIReviewPanel(
                 requirement: state.selectedRequirement,
