@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/window/window_config.dart';
 import 'domain/models/models.dart';
+import 'presentation/common/keyboard_shortcuts.dart';
+import 'presentation/dashboard/dashboard_screen.dart';
+import 'presentation/export/export_report_dialog.dart';
 import 'presentation/providers/ai_providers.dart';
 import 'presentation/providers/document_provider.dart';
 import 'presentation/providers/document_state.dart';
@@ -15,8 +19,10 @@ import 'presentation/widgets/requirement_detail_panel.dart';
 import 'presentation/widgets/left_sidebar/requirements_list_panel.dart';
 
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await WindowConfig.initializeWindow();
+
   runApp(
     const ProviderScope(
       child: CapstoneRequirementsApp(),
@@ -30,7 +36,7 @@ class CapstoneRequirementsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Capstone Requirements Review',
+      title: WindowConfig.appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const HomeScreen(),
@@ -38,111 +44,211 @@ class CapstoneRequirementsApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedTabIndex = 0; // 0 = Workspace, 1 = Dashboard
+
+  @override
+  Widget build(BuildContext context) {
     final docState = ref.watch(documentProvider);
     final aiConfig = ref.watch(aiConfigProvider);
 
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.enter, control: true): () {
-          if (docState.selectedRequirement != null) {
-            ref.read(aiReviewProvider.notifier).analyzeRequirement(docState.selectedRequirement!);
-          }
+    return GlobalKeyboardShortcuts(
+      currentDocument: docState.document,
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.enter, control: true): () {
+            if (docState.selectedRequirement != null) {
+              ref
+                  .read(aiReviewProvider.notifier)
+                  .analyzeRequirement(docState.selectedRequirement!);
+            }
+          },
         },
-      },
-      child: Focus(
-        autofocus: true,
-        child: Scaffold(
-          backgroundColor: AppTheme.background,
-          appBar: AppBar(
-            backgroundColor: AppTheme.surface,
-            elevation: 0,
-            title: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(LucideIcons.fileSearch, color: AppTheme.primary, size: 22),
-                SizedBox(width: AppTheme.space12),
-                Flexible(
-                  child: Text(
-                    'Capstone Requirements Review',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            backgroundColor: AppTheme.background,
+            appBar: AppBar(
+              backgroundColor: AppTheme.surface,
+              elevation: 0,
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(LucideIcons.fileSearch,
+                      color: AppTheme.primary, size: 22),
+                  const SizedBox(width: AppTheme.space12),
+                  const Flexible(
+                    child: Text(
+                      'Capstone Requirements Review',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            actions: [
-              // AI Status Pill
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: InkWell(
-                  onTap: () => AISettingsDialog.show(context),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                  if (docState.hasDocument) ...[
+                    const SizedBox(width: AppTheme.space24),
+                    _buildNavTab(
+                      index: 0,
+                      icon: LucideIcons.layoutGrid,
+                      label: 'Workspace',
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(LucideIcons.sparkles, size: 14, color: AppTheme.primary),
-                        const SizedBox(width: 6),
-                        Text(
-                          'AI: ${aiConfig.provider.label}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(LucideIcons.chevronDown, size: 12, color: AppTheme.primary),
-                      ],
+                    const SizedBox(width: AppTheme.space8),
+                    _buildNavTab(
+                      index: 1,
+                      icon: LucideIcons.barChart3,
+                      label: 'Dashboard',
                     ),
-                  ),
-                ),
+                  ],
+                ],
               ),
-              const SizedBox(width: AppTheme.space12),
-              if (docState.hasDocument) ...[
-                OutlinedButton.icon(
-                  onPressed: () {
-                    ref.read(documentProvider.notifier).reset();
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppTheme.border),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              actions: [
+                if (docState.hasDocument) ...[
+                  // Quick Export Button
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        ExportReportDialog.show(context, docState.document!),
+                    icon: const Icon(LucideIcons.download, size: 16),
+                    label: const Text('Export (Ctrl+E)'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.space12,
+                        vertical: AppTheme.space8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusMedium),
+                      ),
+                      elevation: 0,
                     ),
                   ),
-                  icon: const Icon(LucideIcons.folderOpen, size: 16),
-                  label: const Text('Mở tài liệu khác'),
+                  const SizedBox(width: AppTheme.space12),
+                ],
+                // AI Status Pill
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: InkWell(
+                    onTap: () => AISettingsDialog.show(context),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.08),
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusSmall),
+                        border: Border.all(
+                            color: AppTheme.primary.withValues(alpha: 0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(LucideIcons.sparkles,
+                              size: 14, color: AppTheme.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'AI: ${aiConfig.provider.label}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(LucideIcons.chevronDown,
+                              size: 12, color: AppTheme.primary),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: AppTheme.space12),
+                if (docState.hasDocument) ...[
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      ref.read(documentProvider.notifier).reset();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppTheme.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusMedium),
+                      ),
+                    ),
+                    icon: const Icon(LucideIcons.folderOpen, size: 16),
+                    label: const Text('Mở tài liệu khác'),
+                  ),
+                  const SizedBox(width: AppTheme.space12),
+                ],
               ],
-            ],
-            bottom: const PreferredSize(
-              preferredSize: Size.fromHeight(1),
-              child: Divider(height: 1, color: AppTheme.border),
+              bottom: const PreferredSize(
+                preferredSize: Size.fromHeight(1),
+                child: Divider(height: 1, color: AppTheme.border),
+              ),
             ),
+            body: _buildBody(context, docState),
           ),
-          body: _buildBody(context, ref, docState),
         ),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, DocumentState state) {
+  Widget _buildNavTab({
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = _selectedTabIndex == index;
+
+    return InkWell(
+      onTap: () => setState(() => _selectedTabIndex = index),
+      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.space12,
+          vertical: AppTheme.space8,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primary.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: AppTheme.space8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, DocumentState state) {
     if (state.isLoading) {
       return Center(
         child: Column(
@@ -177,7 +283,8 @@ class HomeScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(AppTheme.space16),
                     decoration: BoxDecoration(
                       color: AppTheme.statusFailed.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.radiusMedium),
                       border: Border.all(
                         color: AppTheme.statusFailed.withValues(alpha: 0.3),
                       ),
@@ -185,7 +292,8 @@ class HomeScreen extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(LucideIcons.alertCircle, color: AppTheme.statusFailed, size: 20),
+                        const Icon(LucideIcons.alertCircle,
+                            color: AppTheme.statusFailed, size: 20),
                         const SizedBox(width: AppTheme.space12),
                         Expanded(
                           child: Text(
@@ -227,7 +335,23 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    // Document loaded state with 2-panel workspace layout (List + AI Review Panel)
+    if (_selectedTabIndex == 1 && state.hasDocument) {
+      return DashboardScreen(
+        document: state.document!,
+        onNavigateToRequirement: (reqId) {
+          final found = state.document!.requirements.firstWhere(
+            (r) => r.id == reqId,
+            orElse: () => state.document!.requirements.first,
+          );
+          ref.read(documentProvider.notifier).selectRequirement(found);
+          setState(() {
+            _selectedTabIndex = 0;
+          });
+        },
+      );
+    }
+
+    // Tab 0: Document loaded state with 3-column workspace layout
     final doc = state.document!;
     return Column(
       children: [
@@ -238,7 +362,6 @@ class HomeScreen extends ConsumerWidget {
             children: [
               // Left Column: Requirements List
               const RequirementsListPanel(),
-
               const VerticalDivider(width: 1),
               // Middle Column: Requirement Detail & Manual Review
               const Expanded(
@@ -277,7 +400,7 @@ class HomeScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
             ),
             child: Text(
-              doc.fileType,
+              doc.fileType.toUpperCase(),
               style: const TextStyle(
                 color: AppTheme.primary,
                 fontWeight: FontWeight.bold,
@@ -320,7 +443,8 @@ class HomeScreen extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(LucideIcons.listOrdered, size: 16, color: AppTheme.textSecondary),
+                const Icon(LucideIcons.listOrdered,
+                    size: 16, color: AppTheme.textSecondary),
                 const SizedBox(width: 6),
                 Text(
                   '${doc.requirements.length} Requirements',
@@ -337,4 +461,5 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+
 }
