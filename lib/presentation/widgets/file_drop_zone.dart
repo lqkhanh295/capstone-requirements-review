@@ -22,14 +22,14 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
 
   Future<void> _pickFile() async {
     try {
-      final pickedFiles = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         dialogTitle: 'Chọn tài liệu yêu cầu (SRS)',
         type: FileType.custom,
         allowedExtensions: AppConstants.supportedExtensions,
       );
 
-      if (pickedFiles.isNotEmpty) {
-        final selectedPath = pickedFiles.first.path;
+      if (result != null && result.files.isNotEmpty) {
+        final selectedPath = result.files.first.path;
         if (selectedPath != null) {
           await ref.read(documentProvider.notifier).loadFromFile(selectedPath);
           widget.onFileSelected?.call();

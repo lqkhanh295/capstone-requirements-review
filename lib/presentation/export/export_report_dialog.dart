@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/models.dart';
 import '../../domain/services/report_export_service.dart';
@@ -212,7 +212,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Icon(LucideIcons.fileSpreadsheet,
+                              const Icon(LucideIcons.table,
                                   color: AppTheme.statusPassed, size: 28),
                               Radio<ExportFormat>(
                                 value: ExportFormat.csv,
@@ -269,7 +269,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   children: [
                     Icon(
                       _isSuccess
-                          ? LucideIcons.checkCircle
+                          ? LucideIcons.checkCircle2
                           : LucideIcons.info,
                       color: _isSuccess
                           ? AppTheme.statusPassed
