@@ -83,7 +83,7 @@ class AIReviewPanel extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: AppTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
             ),
             child: Text(
@@ -113,9 +113,9 @@ class AIReviewPanel extends ConsumerWidget {
       padding: const EdgeInsets.all(AppTheme.space12),
       margin: const EdgeInsets.all(AppTheme.space12),
       decoration: BoxDecoration(
-        color: AppTheme.statusFailed.withOpacity(0.08),
+        color: AppTheme.statusFailed.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.statusFailed.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.statusFailed.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,9 +144,9 @@ class AIReviewPanel extends ConsumerWidget {
       margin: const EdgeInsets.all(AppTheme.space12),
       padding: const EdgeInsets.all(AppTheme.space12),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.05),
+        color: AppTheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,7 +237,7 @@ class AIReviewPanel extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(AppTheme.space16),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.08),
+                  color: AppTheme.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(LucideIcons.sparkle, size: 32, color: AppTheme.primary),
@@ -311,9 +311,9 @@ class AIReviewPanel extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
-        color: scoreColor.withOpacity(0.05),
+        color: scoreColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: scoreColor.withOpacity(0.3)),
+        border: Border.all(color: scoreColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -322,7 +322,7 @@ class AIReviewPanel extends ConsumerWidget {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: scoreColor.withOpacity(0.15),
+              color: scoreColor.withValues(alpha: 0.15),
               border: Border.all(color: scoreColor, width: 2),
             ),
             child: Center(
@@ -484,8 +484,8 @@ class AIReviewPanel extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: issues.isEmpty
-                      ? AppTheme.statusPassed.withOpacity(0.1)
-                      : AppTheme.statusFailed.withOpacity(0.1),
+                      ? AppTheme.statusPassed.withValues(alpha: 0.1)
+                      : AppTheme.statusFailed.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
                 child: Text(
@@ -504,7 +504,7 @@ class AIReviewPanel extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(AppTheme.space12),
               decoration: BoxDecoration(
-                color: AppTheme.statusPassed.withOpacity(0.05),
+                color: AppTheme.statusPassed.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
               child: const Row(
@@ -556,7 +556,7 @@ class AIReviewPanel extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: sevColor.withOpacity(0.1),
+                              color: sevColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                             ),
                             child: Text(
@@ -602,9 +602,9 @@ class AIReviewPanel extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.03),
+        color: AppTheme.primary.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

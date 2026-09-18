@@ -145,11 +145,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.08),
+                        color: AppTheme.primary.withValues(alpha: 0.08),
                         borderRadius:
                             BorderRadius.circular(AppTheme.radiusSmall),
                         border: Border.all(
-                            color: AppTheme.primary.withOpacity(0.2)),
+                            color: AppTheme.primary.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -221,7 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primary.withOpacity(0.1)
+              ? AppTheme.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
         ),
@@ -282,11 +282,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     margin: const EdgeInsets.only(bottom: AppTheme.space24),
                     padding: const EdgeInsets.all(AppTheme.space16),
                     decoration: BoxDecoration(
-                      color: AppTheme.statusFailed.withOpacity(0.08),
+                      color: AppTheme.statusFailed.withValues(alpha: 0.08),
                       borderRadius:
                           BorderRadius.circular(AppTheme.radiusMedium),
                       border: Border.all(
-                        color: AppTheme.statusFailed.withOpacity(0.3),
+                        color: AppTheme.statusFailed.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Row(
@@ -396,7 +396,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
+              color: AppTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
             ),
             child: Text(

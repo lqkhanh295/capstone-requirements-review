@@ -93,7 +93,7 @@ class _RequirementDetailPanelState
             Icon(
               LucideIcons.mousePointerClick,
               size: 48,
-              color: AppTheme.textMuted.withOpacity(0.5),
+              color: AppTheme.textMuted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppTheme.space16),
             const Text(
@@ -183,19 +183,19 @@ class _RequirementDetailPanelState
     Color fg;
     switch (type) {
       case RequirementType.functional:
-        bg = AppTheme.primary.withOpacity(0.1);
+        bg = AppTheme.primary.withValues(alpha: 0.1);
         fg = AppTheme.primary;
         break;
       case RequirementType.nonFunctional:
-        bg = AppTheme.statusNeedsReview.withOpacity(0.1);
+        bg = AppTheme.statusNeedsReview.withValues(alpha: 0.1);
         fg = AppTheme.statusNeedsReview;
         break;
       case RequirementType.security:
-        bg = AppTheme.statusFailed.withOpacity(0.1);
+        bg = AppTheme.statusFailed.withValues(alpha: 0.1);
         fg = AppTheme.statusFailed;
         break;
       case RequirementType.performance:
-        bg = Colors.purple.withOpacity(0.1);
+        bg = Colors.purple.withValues(alpha: 0.1);
         fg = Colors.purple;
         break;
       default:
@@ -320,7 +320,7 @@ class _RequirementDetailPanelState
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? activeColor.withOpacity(0.1)
+              ? activeColor.withValues(alpha: 0.1)
               : AppTheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
@@ -400,7 +400,7 @@ class _RequirementDetailPanelState
             children: [
               CircleAvatar(
                 radius: 12,
-                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
                 child: const Icon(
                   LucideIcons.user,
                   size: 14,
