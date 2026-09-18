@@ -91,7 +91,7 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
         padding: const EdgeInsets.all(AppTheme.space24),
         decoration: BoxDecoration(
           color: _isDragging
-              ? AppTheme.primary.withValues(alpha: 0.08)
+              ? AppTheme.primary.withOpacity(0.08)
               : AppTheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
           border: Border.all(
@@ -102,7 +102,7 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
           boxShadow: _isDragging
               ? [
                   BoxShadow(
-                    color: AppTheme.primary.withValues(alpha: 0.12),
+                    color: AppTheme.primary.withOpacity(0.12),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   )
@@ -125,7 +125,7 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
                   height: 64,
                   decoration: BoxDecoration(
                     color: _isDragging
-                        ? AppTheme.primary.withValues(alpha: 0.15)
+                        ? AppTheme.primary.withOpacity(0.15)
                         : AppTheme.background,
                     shape: BoxShape.circle,
                     border: Border.all(

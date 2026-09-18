@@ -90,7 +90,7 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
                   Container(
                     padding: const EdgeInsets.all(AppTheme.space8),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      color: AppTheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: const Icon(LucideIcons.sparkles, color: AppTheme.primary, size: 20),
@@ -194,9 +194,9 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
                 Container(
                   padding: const EdgeInsets.all(AppTheme.space12),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.05),
+                    color: AppTheme.primary.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppTheme.primary.withOpacity(0.2)),
                   ),
                   child: const Row(
                     children: [
@@ -242,13 +242,13 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
                   margin: const EdgeInsets.only(bottom: AppTheme.space16),
                   decoration: BoxDecoration(
                     color: (aiReviewState.connectionSuccess ?? false)
-                        ? AppTheme.statusPassed.withValues(alpha: 0.1)
-                        : AppTheme.statusFailed.withValues(alpha: 0.1),
+                        ? AppTheme.statusPassed.withOpacity(0.1)
+                        : AppTheme.statusFailed.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                     border: Border.all(
                       color: (aiReviewState.connectionSuccess ?? false)
-                          ? AppTheme.statusPassed.withValues(alpha: 0.3)
-                          : AppTheme.statusFailed.withValues(alpha: 0.3),
+                          ? AppTheme.statusPassed.withOpacity(0.3)
+                          : AppTheme.statusFailed.withOpacity(0.3),
                     ),
                   ),
                   child: Row(

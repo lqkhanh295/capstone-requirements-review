@@ -68,7 +68,7 @@ class _RequirementCardState extends State<RequirementCard> {
           decoration: BoxDecoration(
             color: widget.isSelected
                 ? AppTheme.surfaceHover
-                : (_isHovering ? AppTheme.surfaceHover.withValues(alpha: 0.5) : AppTheme.surface),
+                : (_isHovering ? AppTheme.surfaceHover.withOpacity(0.5) : AppTheme.surface),
             borderRadius: BorderRadius.circular(AppTheme.borderRadius),
             border: Border.all(
               color: widget.isSelected ? AppTheme.primary : AppTheme.border,

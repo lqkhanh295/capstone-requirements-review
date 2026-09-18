@@ -164,7 +164,7 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
         decoration: InputDecoration(
           hintText: 'Search (Ctrl+F)',
           hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppTheme.textSecondary.withValues(alpha: 0.7),
+            color: AppTheme.textSecondary.withOpacity(0.7),
           ),
           prefixIcon: const Icon(LucideIcons.search, size: 16, color: AppTheme.textSecondary),
           isDense: true,
@@ -205,7 +205,7 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: Colors.black.withOpacity(0.05),
                     blurRadius: 2,
                     offset: const Offset(0, 1),
                   )
