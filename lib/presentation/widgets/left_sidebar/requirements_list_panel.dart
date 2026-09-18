@@ -1,50 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../theme/app_theme.dart';
+import '../../../domain/models/models.dart';
+import '../../providers/document_provider.dart';
 import 'requirement_card.dart';
 
-class RequirementsListPanel extends StatefulWidget {
+class RequirementsListPanel extends ConsumerStatefulWidget {
   const RequirementsListPanel({super.key});
 
   @override
-  State<RequirementsListPanel> createState() => _RequirementsListPanelState();
+  ConsumerState<RequirementsListPanel> createState() => _RequirementsListPanelState();
 }
 
-class _RequirementsListPanelState extends State<RequirementsListPanel> {
+class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _selectedTab = 'All';
-
-  // Mock Data for Demo
-  final List<Map<String, dynamic>> _mockRequirements = [
-    {
-      'id': 'REQ-001',
-      'title': 'The system shall allow users to upload PDF files.',
-      'status': RequirementStatus.passed,
-      'issueCount': 0,
-    },
-    {
-      'id': 'REQ-002',
-      'title': 'The system must parse document requirements with 99% accuracy.',
-      'status': RequirementStatus.needsReview,
-      'issueCount': 1,
-    },
-    {
-      'id': 'REQ-003',
-      'title': 'Response time for AI review should be under 2 seconds.',
-      'status': RequirementStatus.failed,
-      'issueCount': 2,
-    },
-    {
-      'id': 'REQ-004',
-      'title': 'Users can export reports as CSV.',
-      'status': RequirementStatus.notReviewed,
-      'issueCount': 0,
-    },
-  ];
-
-  int _selectedIndex = -1;
 
   @override
   void dispose() {
@@ -57,20 +30,58 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
     _searchFocusNode.requestFocus();
   }
 
-  void _handleArrowUp() {
-    if (_selectedIndex > 0) {
-      setState(() => _selectedIndex--);
+  void _handleArrowUp(List<Requirement> reqs, Requirement? selectedReq) {
+    if (reqs.isEmpty) return;
+    if (selectedReq == null) {
+      ref.read(documentProvider.notifier).selectRequirement(reqs.last);
+      return;
+    }
+    final index = reqs.indexWhere((r) => r.id == selectedReq.id);
+    if (index > 0) {
+      ref.read(documentProvider.notifier).selectRequirement(reqs[index - 1]);
     }
   }
 
-  void _handleArrowDown() {
-    if (_selectedIndex < _mockRequirements.length - 1) {
-      setState(() => _selectedIndex++);
+  void _handleArrowDown(List<Requirement> reqs, Requirement? selectedReq) {
+    if (reqs.isEmpty) return;
+    if (selectedReq == null) {
+      ref.read(documentProvider.notifier).selectRequirement(reqs.first);
+      return;
     }
+    final index = reqs.indexWhere((r) => r.id == selectedReq.id);
+    if (index < reqs.length - 1) {
+      ref.read(documentProvider.notifier).selectRequirement(reqs[index + 1]);
+    }
+  }
+
+  List<Requirement> _getFilteredRequirements(List<Requirement> allReqs) {
+    final query = _searchController.text.toLowerCase();
+    return allReqs.where((req) {
+      final matchesSearch = req.id.toLowerCase().contains(query) ||
+          req.title.toLowerCase().contains(query);
+      if (!matchesSearch) return false;
+
+      switch (_selectedTab) {
+        case 'Review':
+          return req.status == ReviewStatus.needsReview || 
+                 (req.review != null && req.review!.overallScore < 80 && req.review!.overallScore >= 50);
+        case 'Failed':
+          return req.status == ReviewStatus.failed ||
+                 (req.review != null && req.review!.overallScore < 50);
+        case 'All':
+        default:
+          return true;
+      }
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final docState = ref.watch(documentProvider);
+    final allReqs = docState.document?.requirements ?? [];
+    final filteredReqs = _getFilteredRequirements(allReqs);
+    final selectedReq = docState.selectedRequirement;
+
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyF): const SearchIntent(),
@@ -80,13 +91,13 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           SearchIntent: CallbackAction<SearchIntent>(onInvoke: (intent) => _handleSearchShortcut()),
-          ArrowUpIntent: CallbackAction<ArrowUpIntent>(onInvoke: (intent) => _handleArrowUp()),
-          ArrowDownIntent: CallbackAction<ArrowDownIntent>(onInvoke: (intent) => _handleArrowDown()),
+          ArrowUpIntent: CallbackAction<ArrowUpIntent>(onInvoke: (intent) => _handleArrowUp(filteredReqs, selectedReq)),
+          ArrowDownIntent: CallbackAction<ArrowDownIntent>(onInvoke: (intent) => _handleArrowDown(filteredReqs, selectedReq)),
         },
         child: Focus(
           autofocus: true,
           child: Container(
-            width: 260, // Slightly wider for better breathing room
+            width: 300,
             decoration: const BoxDecoration(
               color: AppTheme.background,
               border: Border(
@@ -96,11 +107,11 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(),
+                _buildHeader(filteredReqs.length),
                 _buildSearchBar(),
                 _buildTabFilters(),
                 const Divider(),
-                Expanded(child: _buildList()),
+                Expanded(child: _buildList(filteredReqs, selectedReq)),
               ],
             ),
           ),
@@ -109,7 +120,7 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(int count) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
       child: Row(
@@ -129,7 +140,7 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '${_mockRequirements.length}',
+              '$count',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: AppTheme.textPrimary,
               ),
@@ -146,6 +157,7 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
       child: TextField(
         controller: _searchController,
         focusNode: _searchFocusNode,
+        onChanged: (_) => setState(() {}),
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           color: AppTheme.textPrimary,
         ),
@@ -213,20 +225,38 @@ class _RequirementsListPanelState extends State<RequirementsListPanel> {
     );
   }
 
-  Widget _buildList() {
+  Widget _buildList(List<Requirement> reqs, Requirement? selectedReq) {
+    if (reqs.isEmpty) {
+      return const Center(
+        child: Text(
+          'Không tìm thấy yêu cầu nào.',
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+      );
+    }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: _mockRequirements.length,
+      itemCount: reqs.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final req = _mockRequirements[index];
+        final req = reqs[index];
+        final isSelected = selectedReq?.id == req.id;
+        
+        // Calculate issue count from AI review if available
+        int issueCount = 0;
+        if (req.review != null && req.review!.issues.isNotEmpty) {
+           issueCount = req.review!.issues.length;
+        }
+
         return RequirementCard(
-          id: req['id'],
-          title: req['title'],
-          status: req['status'],
-          issueCount: req['issueCount'],
-          isSelected: _selectedIndex == index,
-          onTap: () => setState(() => _selectedIndex = index),
+          id: req.id,
+          title: req.title,
+          status: req.status,
+          issueCount: issueCount,
+          isSelected: isSelected,
+          onTap: () {
+            ref.read(documentProvider.notifier).selectRequirement(req);
+          },
         );
       },
     );

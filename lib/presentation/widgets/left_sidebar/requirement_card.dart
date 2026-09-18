@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../theme/app_theme.dart';
-
-enum RequirementStatus { passed, needsReview, failed, notReviewed }
+import '../../../domain/models/models.dart';
 
 class RequirementCard extends StatefulWidget {
   final String id;
   final String title;
-  final RequirementStatus status;
+  final ReviewStatus status;
   final int issueCount;
   final bool isSelected;
   final VoidCallback onTap;
@@ -31,26 +30,26 @@ class _RequirementCardState extends State<RequirementCard> {
 
   Color _getStatusColor() {
     switch (widget.status) {
-      case RequirementStatus.passed:
+      case ReviewStatus.passed:
         return AppTheme.statusPassed;
-      case RequirementStatus.needsReview:
+      case ReviewStatus.needsReview:
         return AppTheme.statusNeedsReview;
-      case RequirementStatus.failed:
+      case ReviewStatus.failed:
         return AppTheme.statusFailed;
-      case RequirementStatus.notReviewed:
+      case ReviewStatus.notReviewed:
         return AppTheme.statusNotReviewed;
     }
   }
 
   IconData _getStatusIcon() {
     switch (widget.status) {
-      case RequirementStatus.passed:
+      case ReviewStatus.passed:
         return LucideIcons.checkCircle;
-      case RequirementStatus.needsReview:
+      case ReviewStatus.needsReview:
         return LucideIcons.alertTriangle;
-      case RequirementStatus.failed:
+      case ReviewStatus.failed:
         return LucideIcons.xCircle;
-      case RequirementStatus.notReviewed:
+      case ReviewStatus.notReviewed:
         return LucideIcons.helpCircle;
     }
   }

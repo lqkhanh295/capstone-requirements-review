@@ -12,6 +12,8 @@ import 'presentation/widgets/ai_review_panel.dart';
 import 'presentation/widgets/ai_settings_dialog.dart';
 import 'presentation/widgets/file_drop_zone.dart';
 import 'presentation/widgets/requirement_detail_panel.dart';
+import 'presentation/widgets/left_sidebar/requirements_list_panel.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -235,10 +237,8 @@ class HomeScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Left Column: Requirements List
-              SizedBox(
-                width: 300,
-                child: _buildRequirementsList(context, ref, state),
-              ),
+              const RequirementsListPanel(),
+
               const VerticalDivider(width: 1),
               // Middle Column: Requirement Detail & Manual Review
               const Expanded(
@@ -334,224 +334,6 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildRequirementsList(BuildContext context, WidgetRef ref, DocumentState state) {
-    final reqs = state.document!.requirements;
-
-    if (reqs.isEmpty) {
-      return const Center(
-        child: Text(
-          'Không tìm thấy yêu cầu (Requirement) nào trong tài liệu này.',
-          style: TextStyle(color: AppTheme.textSecondary),
-        ),
-      );
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppTheme.space24),
-      itemCount: reqs.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppTheme.space12),
-      itemBuilder: (context, index) {
-        final req = reqs[index];
-        final isSelected = state.selectedRequirement?.id == req.id;
-
-        return InkWell(
-          onTap: () {
-            ref.read(documentProvider.notifier).selectRequirement(req);
-          },
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          child: Container(
-            padding: const EdgeInsets.all(AppTheme.space16),
-            decoration: BoxDecoration(
-              color: isSelected ? AppTheme.primary.withValues(alpha: 0.04) : AppTheme.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-              border: Border.all(
-                color: isSelected ? AppTheme.primary : AppTheme.border,
-                width: isSelected ? 1.5 : 1.0,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppTheme.background,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                        border: Border.all(color: AppTheme.border),
-                      ),
-                      child: Text(
-                        req.id,
-                        style: const TextStyle(
-                          fontFamily: 'JetBrainsMono',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppTheme.space8),
-                    _buildTypeChip(req.type),
-                    const SizedBox(width: AppTheme.space8),
-                    _buildStatusBadge(req),
-                    const Spacer(),
-                    if (req.sourceLocation.isNotEmpty)
-                      Row(
-                        children: [
-                          const Icon(LucideIcons.mapPin, size: 12, color: AppTheme.textMuted),
-                          const SizedBox(width: 4),
-                          Text(
-                            req.sourceLocation,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppTheme.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppTheme.space8),
-                Text(
-                  req.title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppTheme.space4),
-                Text(
-                  req.description,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppTheme.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildStatusBadge(Requirement req) {
-    if (req.review != null) {
-      final score = req.review!.overallScore;
-      Color color;
-      if (score >= 80) {
-        color = AppTheme.statusPassed;
-      } else if (score >= 50) {
-        color = AppTheme.statusNeedsReview;
-      } else {
-        color = AppTheme.statusFailed;
-      }
-
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(LucideIcons.sparkles, size: 10, color: AppTheme.primary),
-            const SizedBox(width: 4),
-            Text(
-              '$score/100',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: color,
-                fontFamily: 'JetBrainsMono',
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Manual status
-    Color statusColor;
-    switch (req.status) {
-      case ReviewStatus.passed:
-        statusColor = AppTheme.statusPassed;
-        break;
-      case ReviewStatus.needsReview:
-        statusColor = AppTheme.statusNeedsReview;
-        break;
-      case ReviewStatus.failed:
-        statusColor = AppTheme.statusFailed;
-        break;
-      case ReviewStatus.notReviewed:
-        statusColor = AppTheme.textMuted;
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: statusColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-      ),
-      child: Text(
-        req.status.label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: statusColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTypeChip(RequirementType type) {
-    Color bg;
-    Color fg;
-    switch (type) {
-      case RequirementType.functional:
-        bg = AppTheme.primary.withValues(alpha: 0.1);
-        fg = AppTheme.primary;
-        break;
-      case RequirementType.nonFunctional:
-        bg = AppTheme.statusNeedsReview.withValues(alpha: 0.1);
-        fg = AppTheme.statusNeedsReview;
-        break;
-      case RequirementType.security:
-        bg = AppTheme.statusFailed.withValues(alpha: 0.1);
-        fg = AppTheme.statusFailed;
-        break;
-      case RequirementType.performance:
-        bg = Colors.purple.withValues(alpha: 0.1);
-        fg = Colors.purple;
-        break;
-      default:
-        bg = AppTheme.background;
-        fg = AppTheme.textSecondary;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-      ),
-      child: Text(
-        type.label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: fg,
-        ),
       ),
     );
   }
