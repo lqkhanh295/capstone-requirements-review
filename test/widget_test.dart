@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:capstone_requirements_review/main.dart';
-import 'package:capstone_requirements_review/presentation/screens/workspace_screen.dart';
 
 void main() {
-  testWidgets('App loads WorkspaceScreen', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const ProviderScope(child: CapstoneApp()));
+  testWidgets('App smoke test - renders file drop zone and upload options', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: CapstoneRequirementsApp(),
+      ),
+    );
 
-    // Verify that our WorkspaceScreen is loaded
-    expect(find.byType(WorkspaceScreen), findsOneWidget);
+    expect(find.text('Capstone Requirements Review'), findsWidgets);
+    expect(find.text('Nhập tài liệu yêu cầu (SRS)'), findsOneWidget);
+    expect(find.text('Chọn tệp từ máy tính'), findsOneWidget);
   });
 }
