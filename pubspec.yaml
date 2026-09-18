@@ -40,17 +40,14 @@ dependencies:
   window_manager: ^0.4.3
   file_picker: ^13.0.0
   desktop_drop: ^0.8.4
-  syncfusion_flutter_pdf: ^34.2.8
+  syncfusion_flutter_pdf: ^27.2.2
   archive: ^4.3.0
-  xml: ^7.0.1
+  xml: ^6.5.0
   path: ^1.9.1
   uuid: ^4.6.0
   lucide_icons_flutter: ^3.1.20
   http: ^1.2.0
   intl: ^0.19.0
-
-dependency_overrides:
-  xml: ^7.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
