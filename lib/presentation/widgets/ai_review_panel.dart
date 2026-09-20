@@ -5,8 +5,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/models.dart';
+import '../../domain/services/ai_service.dart';
 import '../providers/ai_providers.dart';
 import '../providers/document_provider.dart';
+import '../providers/document_state.dart';
 import 'ai_settings_dialog.dart';
 
 class AIReviewPanel extends ConsumerWidget {
@@ -57,7 +59,7 @@ class AIReviewPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildPanelHeader(BuildContext context, WidgetRef ref, dynamic aiConfig) {
+  Widget _buildPanelHeader(BuildContext context, WidgetRef ref, AIServiceConfig aiConfig) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppTheme.space16,
@@ -70,15 +72,18 @@ class AIReviewPanel extends ConsumerWidget {
         children: [
           const Icon(LucideIcons.sparkles, color: AppTheme.primary, size: 18),
           const SizedBox(width: AppTheme.space8),
-          const Text(
-            'AI Review & Analysis',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
+          const Expanded(
+            child: Text(
+              'AI Review & Analysis',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: AppTheme.space8),
           // Provider Tag
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -101,6 +106,8 @@ class AIReviewPanel extends ConsumerWidget {
             tooltip: 'Cài đặt AI Provider',
             icon: const Icon(LucideIcons.settings, size: 16, color: AppTheme.textSecondary),
             onPressed: () => AISettingsDialog.show(context),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
             splashRadius: 18,
           ),
         ],
@@ -729,7 +736,7 @@ class AIReviewPanel extends ConsumerWidget {
   Widget _buildBottomActions(
     BuildContext context,
     WidgetRef ref,
-    dynamic docState,
+    DocumentState docState,
     AIReviewState aiState,
   ) {
     final hasDoc = docState.hasDocument;

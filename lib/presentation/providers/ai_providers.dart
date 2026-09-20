@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/errors/exceptions.dart';
 import '../../domain/models/models.dart';
 import '../../domain/services/ai_service.dart';
 import '../../infrastructure/ai/ai_service_factory.dart';
@@ -159,7 +160,7 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
     } catch (e) {
       state = state.copyWith(
         isAnalyzing: false,
-        errorMessage: e.toString().replaceFirst('Exception: ', '').replaceFirst('ValidationException: ', '').replaceFirst('DocumentParseException: ', ''),
+        errorMessage: _extractErrorMessage(e),
       );
     }
   }
@@ -229,7 +230,7 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
     } catch (e) {
       state = state.copyWith(
         isBatchAnalyzing: false,
-        errorMessage: 'Lỗi trong quá trình phân tích hàng loạt: $e',
+        errorMessage: 'Lỗi trong quá trình phân tích hàng loạt: ${_extractErrorMessage(e)}',
       );
     }
   }
@@ -282,9 +283,23 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
       state = state.copyWith(
         isTestingConnection: false,
         connectionSuccess: false,
-        connectionStatus: e.toString().replaceFirst('ValidationException: ', ''),
+        connectionStatus: _extractErrorMessage(e),
       );
     }
+  }
+
+  String _extractErrorMessage(Object e) {
+    if (e is DocumentParseException) {
+      return e.message;
+    }
+    if (e is ValidationException) {
+      return e.message;
+    }
+    return e
+        .toString()
+        .replaceFirst('DocumentParseException: ', '')
+        .replaceFirst('ValidationException: ', '')
+        .replaceFirst('Exception: ', '');
   }
 
   void clearMessages() {
