@@ -1,4 +1,5 @@
-import 'dart:typed_data';
+import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -6,12 +7,88 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../domain/models/models.dart';
 import '../../domain/services/dashboard_service.dart';
 
+class PdfFontBytes {
+  final Uint8List regular;
+  final Uint8List bold;
+  final Uint8List italic;
+
+  const PdfFontBytes({
+    required this.regular,
+    required this.bold,
+    required this.italic,
+  });
+}
+
 class PDFReportGenerator {
+  /// Loads Inter TTF font bytes from assets or local filesystem for full Unicode & Vietnamese support.
+  static Future<PdfFontBytes?> loadFonts() async {
+    try {
+      final regData = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
+      final boldData = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
+      final italicData = await rootBundle.load('assets/fonts/Inter-Italic.ttf');
+      return PdfFontBytes(
+        regular: regData.buffer.asUint8List(),
+        bold: boldData.buffer.asUint8List(),
+        italic: italicData.buffer.asUint8List(),
+      );
+    } catch (_) {
+      try {
+        final regFile = File('assets/fonts/Inter-Regular.ttf');
+        final boldFile = File('assets/fonts/Inter-Bold.ttf');
+        final italicFile = File('assets/fonts/Inter-Italic.ttf');
+        if (await regFile.exists() && await boldFile.exists() && await italicFile.exists()) {
+          return PdfFontBytes(
+            regular: await regFile.readAsBytes(),
+            bold: await boldFile.readAsBytes(),
+            italic: await italicFile.readAsBytes(),
+          );
+        }
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  /// Sanitizes text for PDF rendering by normalizing box-drawing characters
+  /// and stripping unprintable control sequences that cannot be rendered.
+  static String sanitizeText(String text) {
+    if (text.isEmpty) return text;
+    return text
+        // Normalize box-drawing characters to clean ASCII table borders
+        .replaceAll(RegExp(r'[\u2502\u2503\u2551]'), '|')
+        .replaceAll(RegExp(r'[\u2500\u2501\u2550]'), '-')
+        .replaceAll(RegExp(r'[\u250C-\u254B\u2552-\u257F]'), '+')
+        // Clean unprintable control characters & replacement character
+        .replaceAll('\uFFFD', '')
+        .replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+  }
+
   /// Generates printable PDF document bytes for a given Document.
-  static Future<Uint8List> generatePDF(Document document) async {
+  static Future<Uint8List> generatePDF(
+    Document document, {
+    PdfFontBytes? fontBytes,
+  }) async {
+    fontBytes ??= await loadFonts();
+
+    pw.ThemeData theme;
+    if (fontBytes != null) {
+      final baseFont = pw.Font.ttf(ByteData.sublistView(fontBytes.regular));
+      final boldFont = pw.Font.ttf(ByteData.sublistView(fontBytes.bold));
+      final italicFont = pw.Font.ttf(ByteData.sublistView(fontBytes.italic));
+      theme = pw.ThemeData.withFont(
+        base: baseFont,
+        bold: boldFont,
+        italic: italicFont,
+      );
+    } else {
+      theme = pw.ThemeData();
+    }
+
+    final sanitizedDocName = sanitizeText(document.name);
+
     final pdf = pw.Document(
-      title: 'Requirements Review - ${document.name}',
+      title: 'Requirements Review - $sanitizedDocName',
       author: 'Capstone Requirements Review Tool',
+      theme: theme,
     );
 
     final summary = DashboardService.calculateSummary(document);
@@ -19,14 +96,14 @@ class PDFReportGenerator {
     final formattedDate = dateFormat.format(document.importedAt);
 
     // Primary Colors matching design tokens
-    final primaryColor = PdfColor.fromHex('#2563EB');
-    final passedColor = PdfColor.fromHex('#16A34A');
-    final needsReviewColor = PdfColor.fromHex('#D97706');
-    final failedColor = PdfColor.fromHex('#DC2626');
-    final neutralBg = PdfColor.fromHex('#F8FAFC');
-    final borderCol = PdfColor.fromHex('#E2E8F0');
-    final textDark = PdfColor.fromHex('#0F172A');
-    final textMuted = PdfColor.fromHex('#64748B');
+    final primaryColor = PdfColor.fromHex('#3157D5');
+    final passedColor = PdfColor.fromHex('#27845C');
+    final needsReviewColor = PdfColor.fromHex('#B7791F');
+    final failedColor = PdfColor.fromHex('#C84646');
+    final neutralBg = PdfColor.fromHex('#F7F8FA');
+    final borderCol = PdfColor.fromHex('#E2E5E9');
+    final textDark = PdfColor.fromHex('#171A1F');
+    final textMuted = PdfColor.fromHex('#656B75');
 
     PdfColor scoreColor(int score) {
       if (score >= 80) return passedColor;
@@ -61,7 +138,7 @@ class PDFReportGenerator {
                   ),
                 ),
                 pw.Text(
-                  'Document: ${document.name}',
+                  'Document: $sanitizedDocName',
                   style: pw.TextStyle(fontSize: 9, color: textMuted),
                 ),
               ],
@@ -104,7 +181,7 @@ class PDFReportGenerator {
                         ),
                       ),
                       pw.SizedBox(height: 6),
-                      pw.Text('Document Name: ${document.name}',
+                      pw.Text('Document Name: $sanitizedDocName',
                           style: pw.TextStyle(fontSize: 11, color: textDark)),
                       pw.Text('Review Date: $formattedDate',
                           style: pw.TextStyle(fontSize: 10, color: textMuted)),
@@ -285,33 +362,37 @@ class PDFReportGenerator {
                     pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Row(
-                          children: [
-                            pw.Container(
-                              padding: const pw.EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: pw.BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: pw.BorderRadius.circular(3),
+                        pw.Expanded(
+                          child: pw.Row(
+                            children: [
+                              pw.Container(
+                                padding: const pw.EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: pw.BoxDecoration(
+                                  color: primaryColor,
+                                  borderRadius: pw.BorderRadius.circular(3),
+                                ),
+                                child: pw.Text(
+                                  sanitizeText(req.id),
+                                  style: pw.TextStyle(
+                                      color: PdfColors.white,
+                                      fontSize: 10,
+                                      fontWeight: pw.FontWeight.bold),
+                                ),
                               ),
-                              child: pw.Text(
-                                req.id,
-                                style: pw.TextStyle(
-                                    color: PdfColors.white,
-                                    fontSize: 10,
-                                    fontWeight: pw.FontWeight.bold),
+                              pw.SizedBox(width: 8),
+                              pw.Expanded(
+                                child: pw.Text(
+                                  sanitizeText(req.title),
+                                  style: pw.TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: pw.FontWeight.bold,
+                                    color: textDark,
+                                  ),
+                                ),
                               ),
-                            ),
-                            pw.SizedBox(width: 8),
-                            pw.Text(
-                              req.title,
-                              style: pw.TextStyle(
-                                fontSize: 11,
-                                fontWeight: pw.FontWeight.bold,
-                                color: textDark,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         pw.Text(
                           'Status: ${req.status.label}',
@@ -332,7 +413,7 @@ class PDFReportGenerator {
                     pw.Text('Type: ${req.type.label}',
                         style: pw.TextStyle(fontSize: 9, color: textMuted)),
                     pw.SizedBox(height: 4),
-                    pw.Text(req.description,
+                    pw.Text(sanitizeText(req.description),
                         style: pw.TextStyle(fontSize: 9.5, color: textDark)),
 
                     if (review != null) ...[
@@ -373,7 +454,7 @@ class PDFReportGenerator {
                         (issue) => pw.Padding(
                           padding: const pw.EdgeInsets.only(left: 8, top: 2),
                           child: pw.Text(
-                            '• [${issue.severity.label.toUpperCase()}] ${issue.type}: ${issue.description}',
+                            '- [${issue.severity.label.toUpperCase()}] ${sanitizeText(issue.type)}: ${sanitizeText(issue.description)}',
                             style: pw.TextStyle(fontSize: 8.5, color: textDark),
                           ),
                         ),
@@ -391,7 +472,7 @@ class PDFReportGenerator {
                       pw.Padding(
                         padding: const pw.EdgeInsets.only(left: 8, top: 2),
                         child: pw.Text(
-                          review.suggestedRevision!,
+                          sanitizeText(review.suggestedRevision!),
                           style: pw.TextStyle(
                               fontSize: 8.5,
                               fontStyle: pw.FontStyle.italic,
@@ -411,7 +492,7 @@ class PDFReportGenerator {
                         (c) => pw.Padding(
                           padding: const pw.EdgeInsets.only(left: 8, top: 2),
                           child: pw.Text(
-                            '- ${c.author}: "${c.text}"',
+                            '- ${sanitizeText(c.author)}: "${sanitizeText(c.text)}"',
                             style: pw.TextStyle(fontSize: 8.5, color: textMuted),
                           ),
                         ),
