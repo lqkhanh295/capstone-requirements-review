@@ -87,57 +87,32 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
         _handleDroppedFile(details);
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(AppTheme.space24),
+        duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
           color: _isDragging
-              ? AppTheme.primary.withValues(alpha: 0.08)
+              ? AppTheme.primarySoft
               : AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           border: Border.all(
             color: _isDragging ? AppTheme.primary : AppTheme.border,
-            width: _isDragging ? 2.0 : 1.0,
-            style: BorderStyle.solid,
+            width: _isDragging ? 1.5 : 1.0,
           ),
-          boxShadow: _isDragging
-              ? [
-                  BoxShadow(
-                    color: AppTheme.primary.withValues(alpha: 0.12),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  )
-                ]
-              : [],
         ),
         child: InkWell(
           onTap: isLoading ? null : _pickFile,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               vertical: AppTheme.space32,
-              horizontal: AppTheme.space16,
+              horizontal: AppTheme.space24,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: _isDragging
-                        ? AppTheme.primary.withValues(alpha: 0.15)
-                        : AppTheme.background,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _isDragging ? AppTheme.primary : AppTheme.border,
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Icon(
-                    _isDragging ? LucideIcons.fileDown : LucideIcons.uploadCloud,
-                    size: 32,
-                    color: _isDragging ? AppTheme.primary : AppTheme.textSecondary,
-                  ),
+                Icon(
+                  _isDragging ? LucideIcons.fileDown : LucideIcons.uploadCloud,
+                  size: 28,
+                  color: _isDragging ? AppTheme.primary : AppTheme.textMuted,
                 ),
                 const SizedBox(height: AppTheme.space16),
                 Text(
@@ -145,40 +120,40 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
                       ? 'Thả tài liệu vào đây'
                       : 'Kéo thả tài liệu vào đây hoặc nhấp để chọn tệp',
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppTheme.space8),
+                const SizedBox(height: 6),
                 Text(
                   'Hỗ trợ định dạng: ${AppConstants.supportedExtensions.map((e) => e.toUpperCase()).join(', ')} • Tối đa ${AppConstants.maxFileSizeReadable}',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppTheme.space24),
+                const SizedBox(height: AppTheme.space20),
                 ElevatedButton.icon(
                   onPressed: isLoading ? null : _pickFile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.space24,
-                      vertical: AppTheme.space12,
+                      horizontal: 20,
+                      vertical: 10,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     ),
                     elevation: 0,
                   ),
-                  icon: const Icon(LucideIcons.filePlus, size: 18),
+                  icon: const Icon(LucideIcons.filePlus, size: 15),
                   label: const Text(
                     'Chọn tệp từ máy tính',
-                    style: TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],

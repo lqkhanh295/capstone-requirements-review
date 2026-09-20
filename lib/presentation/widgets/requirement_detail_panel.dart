@@ -86,28 +86,28 @@ class _RequirementDetailPanelState
   Widget _buildEmptyState() {
     return Container(
       color: AppTheme.surface,
-      child: Center(
+      child: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              LucideIcons.mousePointerClick,
-              size: 48,
-              color: AppTheme.textMuted.withValues(alpha: 0.5),
+              LucideIcons.fileSearch,
+              size: 28,
+              color: AppTheme.textMuted,
             ),
-            const SizedBox(height: AppTheme.space16),
-            const Text(
+            SizedBox(height: AppTheme.space12),
+            Text(
               'Chưa chọn Requirement',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textSecondary,
               ),
             ),
-            const SizedBox(height: AppTheme.space8),
-            const Text(
-              'Chọn một yêu cầu từ danh sách bên trái để xem chi tiết',
-              style: TextStyle(fontSize: 14, color: AppTheme.textMuted),
+            SizedBox(height: AppTheme.space4),
+            Text(
+              'Chọn một yêu cầu từ danh sách bên trái để xem chi tiết và đánh giá.',
+              style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
             ),
           ],
         ),
@@ -121,36 +121,36 @@ class _RequirementDetailPanelState
         horizontal: AppTheme.space24,
         vertical: AppTheme.space16,
       ),
-      color: AppTheme.background,
+      color: AppTheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  color: AppTheme.surfaceSubtle,
+                  borderRadius: BorderRadius.circular(4),
                   border: Border.all(color: AppTheme.border),
                 ),
                 child: Text(
                   req.id,
                   style: const TextStyle(
-                    fontFamily: 'JetBrainsMono',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11,
                     color: AppTheme.textPrimary,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
-              const SizedBox(width: AppTheme.space12),
+              const SizedBox(width: AppTheme.space8),
               _buildTypeBadge(req.type),
               const Spacer(),
               if (req.sourceLocation.isNotEmpty) ...[
                 const Icon(
                   LucideIcons.fileText,
-                  size: 14,
+                  size: 13,
                   color: AppTheme.textMuted,
                 ),
                 const SizedBox(width: 4),
@@ -158,7 +158,7 @@ class _RequirementDetailPanelState
                   'Trang ${req.sourceLocation}',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppTheme.textSecondary,
+                    color: AppTheme.textMuted,
                   ),
                 ),
               ],
@@ -168,9 +168,10 @@ class _RequirementDetailPanelState
           Text(
             req.title,
             style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
+              height: 1.35,
             ),
           ),
         ],
@@ -181,37 +182,44 @@ class _RequirementDetailPanelState
   Widget _buildTypeBadge(RequirementType type) {
     Color bg;
     Color fg;
+    Color border;
     switch (type) {
       case RequirementType.functional:
-        bg = AppTheme.primary.withValues(alpha: 0.1);
+        bg = AppTheme.primarySoft;
         fg = AppTheme.primary;
+        border = AppTheme.primary.withValues(alpha: 0.2);
         break;
       case RequirementType.nonFunctional:
         bg = AppTheme.statusNeedsReview.withValues(alpha: 0.1);
         fg = AppTheme.statusNeedsReview;
+        border = AppTheme.statusNeedsReview.withValues(alpha: 0.25);
         break;
       case RequirementType.security:
         bg = AppTheme.statusFailed.withValues(alpha: 0.1);
         fg = AppTheme.statusFailed;
+        border = AppTheme.statusFailed.withValues(alpha: 0.25);
         break;
       case RequirementType.performance:
-        bg = Colors.purple.withValues(alpha: 0.1);
-        fg = Colors.purple;
+        bg = const Color(0xFF5B21B6).withValues(alpha: 0.08);
+        fg = const Color(0xFF5B21B6);
+        border = const Color(0xFF5B21B6).withValues(alpha: 0.2);
         break;
       default:
-        bg = AppTheme.border;
+        bg = AppTheme.surfaceSubtle;
         fg = AppTheme.textSecondary;
+        border = AppTheme.border;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+        border: Border.all(color: border),
       ),
       child: Text(
         type.label,
-        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
       ),
     );
   }
@@ -223,27 +231,27 @@ class _RequirementDetailPanelState
         const Text(
           'MÔ TẢ YÊU CẦU',
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
-            letterSpacing: 1.0,
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: AppTheme.space12),
+        const SizedBox(height: AppTheme.space8),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(AppTheme.space16),
           decoration: BoxDecoration(
-            color: AppTheme.background,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            border: Border.all(color: AppTheme.borderLight),
+            color: AppTheme.surfaceSubtle,
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+            border: Border.all(color: AppTheme.border),
           ),
           child: Text(
             req.description.isNotEmpty
                 ? req.description
                 : 'Không có mô tả chi tiết.',
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               color: AppTheme.textPrimary,
               height: 1.6,
             ),
@@ -260,13 +268,13 @@ class _RequirementDetailPanelState
         const Text(
           'TRẠNG THÁI ĐÁNH GIÁ THỦ CÔNG',
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
-            letterSpacing: 1.0,
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: AppTheme.space12),
+        const SizedBox(height: AppTheme.space8),
         Wrap(
           spacing: AppTheme.space8,
           runSpacing: AppTheme.space8,
@@ -312,17 +320,17 @@ class _RequirementDetailPanelState
             .read(documentProvider.notifier)
             .updateRequirementStatus(reqId, status);
       },
-      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.space16,
-          vertical: AppTheme.space12,
+          horizontal: 14,
+          vertical: 9,
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? activeColor.withValues(alpha: 0.1)
+              ? activeColor.withValues(alpha: 0.08)
               : AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           border: Border.all(
             color: isSelected ? activeColor : AppTheme.border,
             width: isSelected ? 1.5 : 1.0,
@@ -333,15 +341,15 @@ class _RequirementDetailPanelState
           children: [
             Icon(
               icon,
-              size: 16,
+              size: 15,
               color: isSelected ? activeColor : AppTheme.textSecondary,
             ),
-            const SizedBox(width: AppTheme.space8),
+            const SizedBox(width: 6),
             Text(
               status.label,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? activeColor : AppTheme.textPrimary,
               ),
             ),
@@ -358,26 +366,26 @@ class _RequirementDetailPanelState
         const Text(
           'GHI CHÚ REVIEWER',
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
-            letterSpacing: 1.0,
+            letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: AppTheme.space12),
+        const SizedBox(height: AppTheme.space8),
         if (req.comments.isNotEmpty) ...[
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: req.comments.length,
             separatorBuilder: (context, index) =>
-                const SizedBox(height: AppTheme.space12),
+                const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final comment = req.comments[index];
               return _buildCommentItem(req.id, comment);
             },
           ),
-          const SizedBox(height: AppTheme.space16),
+          const SizedBox(height: 12),
         ],
         _buildCommentInput(req.id),
       ],
@@ -387,10 +395,10 @@ class _RequirementDetailPanelState
   Widget _buildCommentItem(String reqId, ReviewComment comment) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space16),
+      padding: const EdgeInsets.all(AppTheme.space12),
       decoration: BoxDecoration(
         color: AppTheme.background,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -399,11 +407,11 @@ class _RequirementDetailPanelState
           Row(
             children: [
               CircleAvatar(
-                radius: 12,
-                backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
+                radius: 10,
+                backgroundColor: AppTheme.primarySoft,
                 child: const Icon(
                   LucideIcons.user,
-                  size: 14,
+                  size: 12,
                   color: AppTheme.primary,
                 ),
               ),
@@ -412,7 +420,8 @@ class _RequirementDetailPanelState
                 comment.author,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
+                  fontSize: 12,
+                  color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(width: AppTheme.space8),
@@ -465,7 +474,7 @@ class _RequirementDetailPanelState
                   },
                   child: const Icon(
                     LucideIcons.pencil,
-                    size: 14,
+                    size: 13,
                     color: AppTheme.textMuted,
                   ),
                 ),
@@ -478,14 +487,14 @@ class _RequirementDetailPanelState
                   },
                   child: const Icon(
                     LucideIcons.trash2,
-                    size: 14,
+                    size: 13,
                     color: AppTheme.textMuted,
                   ),
                 ),
               ],
             ],
           ),
-          const SizedBox(height: AppTheme.space8),
+          const SizedBox(height: 6),
           if (_editingCommentId == comment.id)
             TextField(
               controller: _editCommentController,
@@ -494,14 +503,14 @@ class _RequirementDetailPanelState
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 isDense: true,
-                contentPadding: EdgeInsets.all(AppTheme.space8),
+                contentPadding: EdgeInsets.all(8),
               ),
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 13),
             )
           else
             Text(
               comment.text,
-              style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary),
+              style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary, height: 1.4),
             ),
         ],
       ),
@@ -510,14 +519,14 @@ class _RequirementDetailPanelState
 
   Widget _buildCommentInput(String reqId) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: BorderRadius.circular(AppTheme.radiusInput),
         border: Border.all(color: AppTheme.border),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: TextField(
@@ -526,14 +535,18 @@ class _RequirementDetailPanelState
               maxLines: 4,
               decoration: const InputDecoration(
                 hintText: 'Thêm ghi chú review mới...',
+                hintStyle: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                fillColor: Colors.transparent,
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
               ),
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 13),
             ),
           ),
-          const SizedBox(width: AppTheme.space12),
+          const SizedBox(width: AppTheme.space8),
           IconButton(
             onPressed: () {
               if (_commentController.text.trim().isEmpty) return;
@@ -549,8 +562,9 @@ class _RequirementDetailPanelState
             icon: const Icon(
               LucideIcons.sendHorizonal,
               color: AppTheme.primary,
+              size: 16,
             ),
-            splashRadius: 20,
+            splashRadius: 16,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),

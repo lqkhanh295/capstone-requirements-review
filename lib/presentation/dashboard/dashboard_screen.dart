@@ -33,10 +33,10 @@ class DashboardScreen extends StatelessWidget {
           children: [
             // Top Bar: Document Info & Export Action
             Container(
-              padding: const EdgeInsets.all(AppTheme.space20),
+              padding: const EdgeInsets.all(AppTheme.space16),
               decoration: BoxDecoration(
                 color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                 border: Border.all(color: AppTheme.border),
               ),
               child: Row(
@@ -45,19 +45,18 @@ class DashboardScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(AppTheme.space12),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppTheme.primary.withOpacity(0.1),
-                          borderRadius:
-                              BorderRadius.circular(AppTheme.radiusMedium),
+                          color: AppTheme.primarySoft,
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Icon(
                           LucideIcons.fileText,
                           color: AppTheme.primary,
-                          size: 24,
+                          size: 18,
                         ),
                       ),
-                      const SizedBox(width: AppTheme.space16),
+                      const SizedBox(width: AppTheme.space12),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -66,53 +65,54 @@ class DashboardScreen extends StatelessWidget {
                               Text(
                                 document.name,
                                 style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
                                   color: AppTheme.textPrimary,
                                 ),
                               ),
                               const SizedBox(width: AppTheme.space8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: AppTheme.space8,
+                                  horizontal: 6,
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.borderLight,
+                                  color: AppTheme.surfaceSubtle,
                                   borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: AppTheme.border),
                                 ),
                                 child: Text(
                                   document.fileType.toUpperCase(),
                                   style: const TextStyle(
                                     fontSize: 10,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w600,
                                     color: AppTheme.textSecondary,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Row(
                             children: [
                               const Icon(LucideIcons.calendar,
-                                  size: 14, color: AppTheme.textMuted),
+                                  size: 13, color: AppTheme.textMuted),
                               const SizedBox(width: 4),
                               Text(
                                 'Reviewed on ${dateFormat.format(document.importedAt)}',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: AppTheme.textMuted,
                                 ),
                               ),
                               const SizedBox(width: AppTheme.space16),
                               const Icon(LucideIcons.layers,
-                                  size: 14, color: AppTheme.textMuted),
+                                  size: 13, color: AppTheme.textMuted),
                               const SizedBox(width: 4),
                               Text(
                                 '${document.requirements.length} Requirements',
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   color: AppTheme.textMuted,
                                 ),
                               ),
@@ -126,18 +126,18 @@ class DashboardScreen extends StatelessWidget {
                   // Export Action Button
                   ElevatedButton.icon(
                     onPressed: () => ExportReportDialog.show(context, document),
-                    icon: const Icon(LucideIcons.download, size: 18),
-                    label: const Text('Export Report (Ctrl+E)'),
+                    icon: const Icon(LucideIcons.download, size: 14),
+                    label: const Text('Export Report (Ctrl+E)', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.space20,
-                        vertical: AppTheme.space16,
+                        horizontal: 14,
+                        vertical: 9,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusMedium),
+                            BorderRadius.circular(AppTheme.radiusButton),
                       ),
                       elevation: 0,
                     ),
@@ -146,14 +146,14 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: AppTheme.space24),
+            const SizedBox(height: AppTheme.space20),
 
             // Section: Status Summary Cards (Passed, Needs Review, Failed, Not Reviewed)
             const Text(
               'Requirements Overview',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),
             ),

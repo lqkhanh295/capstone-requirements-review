@@ -28,18 +28,11 @@ class RecentIssuesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space20),
+      padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         border: Border.all(color: AppTheme.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,31 +44,32 @@ class RecentIssuesList extends StatelessWidget {
               Row(
                 children: [
                   const Icon(LucideIcons.alertTriangle,
-                      color: AppTheme.statusFailed, size: 20),
+                      color: AppTheme.statusNeedsReview, size: 16),
                   const SizedBox(width: AppTheme.space8),
                   const Text(
                     'Recent Issues',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
                   const SizedBox(width: AppTheme.space8),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.space8,
-                      vertical: AppTheme.space4,
+                      horizontal: 7,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.borderLight,
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppTheme.surfaceSubtle,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                      border: Border.all(color: AppTheme.border),
                     ),
                     child: Text(
                       '${issues.length}',
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                         color: AppTheme.textSecondary,
                       ),
                     ),
@@ -89,24 +83,24 @@ class RecentIssuesList extends StatelessWidget {
           // List Body
           if (issues.isEmpty)
             Container(
-              padding: const EdgeInsets.all(AppTheme.space32),
+              padding: const EdgeInsets.all(AppTheme.space24),
               alignment: Alignment.center,
               child: const Column(
                 children: [
-                  Icon(LucideIcons.checkCheck,
-                      size: 40, color: AppTheme.statusPassed),
-                  SizedBox(height: AppTheme.space12),
+                  Icon(LucideIcons.checkCircle2,
+                      size: 28, color: AppTheme.statusPassed),
+                  SizedBox(height: 8),
                   Text(
-                    'No issues detected!',
+                    'Không phát hiện vấn đề nào',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
-                  SizedBox(height: AppTheme.space4),
+                  SizedBox(height: 4),
                   Text(
-                    'All reviewed requirements passed without flagged issues.',
+                    'Tất cả yêu cầu đã đánh giá đều đạt chuẩn chất lượng.',
                     style: TextStyle(
                       fontSize: 12,
                       color: AppTheme.textMuted,
@@ -121,7 +115,7 @@ class RecentIssuesList extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: issues.length > 5 ? 5 : issues.length,
               separatorBuilder: (context, index) => const Divider(
-                height: AppTheme.space16,
+                height: AppTheme.space12,
                 color: AppTheme.borderLight,
               ),
               itemBuilder: (context, index) {
@@ -134,35 +128,36 @@ class RecentIssuesList extends StatelessWidget {
                       onSelectRequirement!(issue.requirementId);
                     }
                   },
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        vertical: AppTheme.space4, horizontal: AppTheme.space4),
+                        vertical: 4, horizontal: 4),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Severity Badge
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: AppTheme.space8,
-                            vertical: AppTheme.space4,
+                            horizontal: 6,
+                            vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.1),
+                            color: color.withValues(alpha: 0.1),
                             borderRadius:
-                                BorderRadius.circular(AppTheme.radiusSmall),
-                            border: Border.all(color: color.withOpacity(0.3)),
+                                BorderRadius.circular(4),
+                            border: Border.all(color: color.withValues(alpha: 0.25)),
                           ),
                           child: Text(
                             issue.severity.label.toUpperCase(),
                             style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
                               color: color,
+                              letterSpacing: 0.3,
                             ),
                           ),
                         ),
-                        const SizedBox(width: AppTheme.space12),
+                        const SizedBox(width: AppTheme.space8),
 
                         // Context & Description
                         Expanded(
@@ -174,9 +169,8 @@ class RecentIssuesList extends StatelessWidget {
                                   Text(
                                     issue.requirementId,
                                     style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'JetBrains Mono',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                       color: AppTheme.primary,
                                     ),
                                   ),
@@ -201,6 +195,7 @@ class RecentIssuesList extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppTheme.textSecondary,
+                                  height: 1.35,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,

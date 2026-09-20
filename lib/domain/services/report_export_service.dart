@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -59,14 +58,12 @@ class ReportExportService {
 
       String? savePath = customPath;
 
-      if (savePath == null) {
-        savePath = await FilePicker.platform.saveFile(
-          dialogTitle: isPdf ? 'Export PDF Report' : 'Export CSV Data',
-          fileName: defaultFileName,
-          type: FileType.custom,
-          allowedExtensions: isPdf ? ['pdf'] : ['csv'],
-        );
-      }
+      savePath ??= await FilePicker.platform.saveFile(
+        dialogTitle: isPdf ? 'Export PDF Report' : 'Export CSV Data',
+        fileName: defaultFileName,
+        type: FileType.custom,
+        allowedExtensions: isPdf ? ['pdf'] : ['csv'],
+      );
 
       if (savePath == null) {
         return const ExportResult(

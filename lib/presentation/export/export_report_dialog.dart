@@ -60,7 +60,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        borderRadius: BorderRadius.circular(AppTheme.radiusDialog),
       ),
       backgroundColor: AppTheme.surface,
       child: Container(
@@ -77,13 +77,13 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                 const Row(
                   children: [
                     Icon(LucideIcons.fileOutput,
-                        color: AppTheme.primary, size: 24),
+                        color: AppTheme.primary, size: 20),
                     SizedBox(width: AppTheme.space12),
                     Text(
                       'Export Review Report',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
                     ),
@@ -91,7 +91,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(LucideIcons.x, color: AppTheme.textMuted),
+                  icon: const Icon(LucideIcons.x, color: AppTheme.textMuted, size: 18),
                   tooltip: 'Close (Esc)',
                 ),
               ],
@@ -109,8 +109,8 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
             const Text(
               'Select Export Format',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),
             ),
@@ -125,20 +125,20 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                     onTap: _isExporting
                         ? null
                         : () => setState(() => _selectedFormat = ExportFormat.pdf),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                     child: Container(
                       padding: const EdgeInsets.all(AppTheme.space16),
                       decoration: BoxDecoration(
                         color: _selectedFormat == ExportFormat.pdf
-                            ? AppTheme.primary.withOpacity(0.06)
+                            ? AppTheme.primarySoft
                             : AppTheme.surface,
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusMedium),
+                            BorderRadius.circular(AppTheme.radiusCard),
                         border: Border.all(
                           color: _selectedFormat == ExportFormat.pdf
                               ? AppTheme.primary
                               : AppTheme.border,
-                          width: _selectedFormat == ExportFormat.pdf ? 2 : 1,
+                          width: _selectedFormat == ExportFormat.pdf ? 1.5 : 1,
                         ),
                       ),
                       child: Column(
@@ -148,7 +148,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Icon(LucideIcons.fileText,
-                                  color: AppTheme.statusFailed, size: 28),
+                                  color: AppTheme.statusFailed, size: 24),
                               Radio<ExportFormat>(
                                 value: ExportFormat.pdf,
                                 groupValue: _selectedFormat,
@@ -164,8 +164,8 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                           const Text(
                             'PDF Document',
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
                             ),
                           ),
@@ -175,6 +175,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                             style: TextStyle(
                               fontSize: 11,
                               color: AppTheme.textMuted,
+                              height: 1.4,
                             ),
                           ),
                         ],
@@ -190,20 +191,20 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                     onTap: _isExporting
                         ? null
                         : () => setState(() => _selectedFormat = ExportFormat.csv),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                     child: Container(
                       padding: const EdgeInsets.all(AppTheme.space16),
                       decoration: BoxDecoration(
                         color: _selectedFormat == ExportFormat.csv
-                            ? AppTheme.primary.withOpacity(0.06)
+                            ? AppTheme.primarySoft
                             : AppTheme.surface,
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusMedium),
+                            BorderRadius.circular(AppTheme.radiusCard),
                         border: Border.all(
                           color: _selectedFormat == ExportFormat.csv
                               ? AppTheme.primary
                               : AppTheme.border,
-                          width: _selectedFormat == ExportFormat.csv ? 2 : 1,
+                          width: _selectedFormat == ExportFormat.csv ? 1.5 : 1,
                         ),
                       ),
                       child: Column(
@@ -213,7 +214,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Icon(LucideIcons.table,
-                                  color: AppTheme.statusPassed, size: 28),
+                                  color: AppTheme.statusPassed, size: 24),
                               Radio<ExportFormat>(
                                 value: ExportFormat.csv,
                                 groupValue: _selectedFormat,
@@ -229,8 +230,8 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                           const Text(
                             'CSV Table Data',
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
                             ),
                           ),
@@ -240,6 +241,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                             style: TextStyle(
                               fontSize: 11,
                               color: AppTheme.textMuted,
+                              height: 1.4,
                             ),
                           ),
                         ],
@@ -256,13 +258,13 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                 padding: const EdgeInsets.all(AppTheme.space12),
                 decoration: BoxDecoration(
                   color: _isSuccess
-                      ? AppTheme.statusPassed.withOpacity(0.1)
-                      : AppTheme.statusNeedsReview.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      ? AppTheme.statusPassed.withValues(alpha: 0.08)
+                      : AppTheme.statusNeedsReview.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                   border: Border.all(
                     color: _isSuccess
-                        ? AppTheme.statusPassed.withOpacity(0.3)
-                        : AppTheme.statusNeedsReview.withOpacity(0.3),
+                        ? AppTheme.statusPassed.withValues(alpha: 0.25)
+                        : AppTheme.statusNeedsReview.withValues(alpha: 0.25),
                   ),
                 ),
                 child: Row(
@@ -274,7 +276,7 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                       color: _isSuccess
                           ? AppTheme.statusPassed
                           : AppTheme.statusNeedsReview,
-                      size: 18,
+                      size: 16,
                     ),
                     const SizedBox(width: AppTheme.space8),
                     Expanded(
@@ -308,6 +310,10 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                       horizontal: AppTheme.space16,
                       vertical: AppTheme.space12,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.radiusButton),
+                    ),
                   ),
                   child: const Text('Cancel'),
                 ),
@@ -316,28 +322,29 @@ class _ExportReportDialogState extends State<ExportReportDialog> {
                   onPressed: _isExporting ? null : _handleExport,
                   icon: _isExporting
                       ? const SizedBox(
-                          width: 16,
-                          height: 16,
+                          width: 14,
+                          height: 14,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Icon(LucideIcons.download, size: 18),
+                      : const Icon(LucideIcons.download, size: 16),
                   label: Text(_isExporting
                       ? 'Exporting...'
                       : 'Export ${_selectedFormat == ExportFormat.pdf ? "PDF" : "CSV"}'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppTheme.space20,
                       vertical: AppTheme.space12,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.circular(AppTheme.radiusMedium),
+                          BorderRadius.circular(AppTheme.radiusButton),
                     ),
                   ),
                 ),

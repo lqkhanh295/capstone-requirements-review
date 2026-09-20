@@ -47,94 +47,88 @@ class DashboardStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+      borderRadius: BorderRadius.circular(AppTheme.radiusCard),
       child: Container(
-        padding: const EdgeInsets.all(AppTheme.space16),
+        padding: const EdgeInsets.all(AppTheme.space14),
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           border: Border.all(color: AppTheme.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top Row: Icon & Status Label
+            // Top Row: Icon & Percentage Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(AppTheme.space8),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Icon(
                     statusIcon,
                     color: statusColor,
-                    size: 20,
+                    size: 15,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.space8,
-                    vertical: AppTheme.space4,
+                    horizontal: 7,
+                    vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    color: statusColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
                   ),
                   child: Text(
                     '${percentage.toStringAsFixed(1)}%',
                     style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
                       color: statusColor,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.space12),
+            const SizedBox(height: 10),
 
             // Middle: Count
             Text(
               '$count',
               style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
                 color: AppTheme.textPrimary,
                 height: 1.0,
               ),
             ),
-            const SizedBox(height: AppTheme.space4),
+            const SizedBox(height: 4),
 
             // Label
             Text(
               status.label,
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: AppTheme.textSecondary,
               ),
             ),
-            const SizedBox(height: AppTheme.space12),
+            const SizedBox(height: 10),
 
             // Progress Bar
             ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: percentage > 0 ? (percentage / 100).clamp(0.0, 1.0) : 0.0,
-                backgroundColor: AppTheme.borderLight,
+                backgroundColor: AppTheme.surfaceSubtle,
                 valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                minHeight: 5,
+                minHeight: 4,
               ),
             ),
           ],

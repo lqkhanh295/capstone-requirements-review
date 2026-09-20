@@ -83,18 +83,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             appBar: AppBar(
               backgroundColor: AppTheme.surface,
               elevation: 0,
+              toolbarHeight: 48,
               title: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(LucideIcons.fileSearch,
-                        color: AppTheme.primary, size: 20),
+                        color: AppTheme.primary, size: 18),
                     const SizedBox(width: AppTheme.space8),
                     const Text(
                       'Capstone Requirements Review',
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
@@ -106,7 +107,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: LucideIcons.layoutGrid,
                         label: 'Workspace',
                       ),
-                      const SizedBox(width: AppTheme.space8),
+                      const SizedBox(width: 4),
                       _buildNavTab(
                         index: 1,
                         icon: LucideIcons.barChart3,
@@ -122,18 +123,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ElevatedButton.icon(
                     onPressed: () =>
                         ExportReportDialog.show(context, docState.document!),
-                    icon: const Icon(LucideIcons.download, size: 16),
-                    label: const Text('Export (Ctrl+E)'),
+                    icon: const Icon(LucideIcons.download, size: 14),
+                    label: const Text('Export (Ctrl+E)', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.space12,
-                        vertical: AppTheme.space8,
+                        horizontal: 12,
+                        vertical: 8,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusMedium),
+                            BorderRadius.circular(AppTheme.radiusButton),
                       ),
                       elevation: 0,
                     ),
@@ -142,42 +143,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
                 // AI Status Pill
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 9),
                   child: InkWell(
                     onTap: () => AISettingsDialog.show(context),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                          horizontal: 9, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.08),
+                        color: AppTheme.surfaceSubtle,
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusSmall),
-                        border: Border.all(
-                            color: AppTheme.primary.withValues(alpha: 0.2)),
+                            BorderRadius.circular(AppTheme.radiusPill),
+                        border: Border.all(color: AppTheme.border),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(LucideIcons.sparkles,
-                              size: 14, color: AppTheme.primary),
-                          const SizedBox(width: 4),
+                          const Icon(LucideIcons.bot,
+                              size: 13, color: AppTheme.textSecondary),
+                          const SizedBox(width: 5),
                           ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 160),
+                            constraints: const BoxConstraints(maxWidth: 150),
                             child: Text(
                               'AI: ${aiConfig.provider.label}',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: const TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w500,
-                                color: AppTheme.primary,
+                                color: AppTheme.textSecondary,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 3),
                           const Icon(LucideIcons.chevronDown,
-                              size: 12, color: AppTheme.primary),
+                              size: 12, color: AppTheme.textMuted),
                         ],
                       ),
                     ),
@@ -191,13 +191,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppTheme.border),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusMedium),
+                            BorderRadius.circular(AppTheme.radiusButton),
                       ),
                     ),
-                    icon: const Icon(LucideIcons.folderOpen, size: 16),
-                    label: const Text('Mở tài liệu khác'),
+                    icon: const Icon(LucideIcons.folderOpen, size: 14),
+                    label: const Text('Mở tài liệu khác', style: TextStyle(fontSize: 12)),
                   ),
                   const SizedBox(width: AppTheme.space12),
                 ],
@@ -223,32 +227,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return InkWell(
       onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.space8,
-          vertical: AppTheme.space8,
+          horizontal: 10,
+          vertical: 6,
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primary.withValues(alpha: 0.1)
+              ? AppTheme.primarySoft
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 16,
+              size: 14,
               color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
             ),
-            const SizedBox(width: AppTheme.space8),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
               ),
             ),
@@ -321,22 +325,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const Text(
                   'Nhập tài liệu yêu cầu (SRS)',
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppTheme.space8),
+                const SizedBox(height: 6),
                 const Text(
                   'Tải lên tài liệu phần mềm của bạn để tự động nhận diện phân đoạn và bóc tách các Requirements.',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     color: AppTheme.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppTheme.space32),
+                const SizedBox(height: AppTheme.space24),
                 const FileDropZone(),
               ],
             ),
@@ -392,8 +396,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildDocumentHeader(Document doc) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.space24,
-        vertical: AppTheme.space16,
+        horizontal: AppTheme.space20,
+        vertical: 10,
       ),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
@@ -404,17 +408,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              color: AppTheme.primarySoft,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
             ),
             child: Text(
               doc.fileType.toUpperCase(),
               style: const TextStyle(
                 color: AppTheme.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                fontSize: 10,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -426,18 +432,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Text(
                   doc.name,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 1),
                 Text(
                   '${(doc.fileSize / 1024).toStringAsFixed(1)} KB • Đường dẫn: ${doc.filePath}',
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
+                    fontSize: 11,
+                    color: AppTheme.textMuted,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -445,22 +451,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppTheme.background,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              color: AppTheme.surfaceSubtle,
+              borderRadius: BorderRadius.circular(AppTheme.radiusPill),
               border: Border.all(color: AppTheme.border),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(LucideIcons.listOrdered,
-                    size: 16, color: AppTheme.textSecondary),
-                const SizedBox(width: 6),
+                    size: 14, color: AppTheme.textSecondary),
+                const SizedBox(width: 5),
                 Text(
                   '${doc.requirements.length} Requirements',
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppTheme.textPrimary,
                   ),

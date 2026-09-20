@@ -63,21 +63,22 @@ class AIReviewPanel extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppTheme.space16,
-        vertical: AppTheme.space12,
+        vertical: 10,
       ),
       decoration: const BoxDecoration(
+        color: AppTheme.surface,
         border: Border(bottom: BorderSide(color: AppTheme.border)),
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.sparkles, color: AppTheme.primary, size: 18),
+          const Icon(LucideIcons.shieldCheck, color: AppTheme.primary, size: 16),
           const SizedBox(width: AppTheme.space8),
           const Expanded(
             child: Text(
               'AI Review & Analysis',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),
               overflow: TextOverflow.ellipsis,
@@ -86,17 +87,19 @@ class AIReviewPanel extends ConsumerWidget {
           const SizedBox(width: AppTheme.space8),
           // Provider Tag
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              color: AppTheme.surfaceSubtle,
+              borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+              border: Border.all(color: AppTheme.border),
             ),
             child: Text(
               aiConfig.provider.name.toUpperCase(),
               style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.primary,
+                color: AppTheme.textSecondary,
+                letterSpacing: 0.3,
               ),
             ),
           ),
@@ -104,11 +107,11 @@ class AIReviewPanel extends ConsumerWidget {
           // Settings button
           IconButton(
             tooltip: 'Cài đặt AI Provider',
-            icon: const Icon(LucideIcons.settings, size: 16, color: AppTheme.textSecondary),
+            icon: const Icon(LucideIcons.settings, size: 15, color: AppTheme.textSecondary),
             onPressed: () => AISettingsDialog.show(context),
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-            splashRadius: 18,
+            constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+            splashRadius: 16,
           ),
         ],
       ),
@@ -120,14 +123,14 @@ class AIReviewPanel extends ConsumerWidget {
       padding: const EdgeInsets.all(AppTheme.space12),
       margin: const EdgeInsets.all(AppTheme.space12),
       decoration: BoxDecoration(
-        color: AppTheme.statusFailed.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.statusFailed.withValues(alpha: 0.3)),
+        color: AppTheme.statusFailed.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        border: Border.all(color: AppTheme.statusFailed.withValues(alpha: 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(LucideIcons.alertCircle, color: AppTheme.statusFailed, size: 16),
+          const Icon(LucideIcons.alertCircle, color: AppTheme.statusFailed, size: 15),
           const SizedBox(width: AppTheme.space8),
           Expanded(
             child: Text(
@@ -151,9 +154,9 @@ class AIReviewPanel extends ConsumerWidget {
       margin: const EdgeInsets.all(AppTheme.space12),
       padding: const EdgeInsets.all(AppTheme.space12),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+        color: AppTheme.surfaceSubtle,
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,21 +164,21 @@ class AIReviewPanel extends ConsumerWidget {
           Row(
             children: [
               const SizedBox(
-                width: 14,
-                height: 14,
+                width: 12,
+                height: 12,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               const SizedBox(width: AppTheme.space8),
               Text(
                 'Đang phân tích: ${state.batchCompleted}/${state.batchTotal}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.primary),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
               ),
               const Spacer(),
               TextButton(
                 onPressed: () => ref.read(aiReviewProvider.notifier).cancelBatchAnalysis(),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
-                  minimumSize: const Size(40, 20),
+                  minimumSize: const Size(36, 18),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: const Text('Dừng', style: TextStyle(fontSize: 11, color: AppTheme.statusFailed)),
@@ -183,12 +186,14 @@ class AIReviewPanel extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppTheme.space8),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: AppTheme.border,
-            color: AppTheme.primary,
-            minHeight: 4,
+          ClipRRect(
             borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: progress,
+              backgroundColor: AppTheme.borderLight,
+              color: AppTheme.primary,
+              minHeight: 4,
+            ),
           ),
         ],
       ),
@@ -203,12 +208,17 @@ class AIReviewPanel extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(LucideIcons.fileText, size: 36, color: AppTheme.textMuted),
-              SizedBox(height: AppTheme.space12),
+              Icon(LucideIcons.fileText, size: 24, color: AppTheme.textMuted),
+              SizedBox(height: AppTheme.space8),
               Text(
-                'Chọn một Requirement ở danh sách để xem đánh giá AI.',
+                'Chưa chọn Requirement',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Chọn một yêu cầu ở danh sách để xem đánh giá AI.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
               ),
             ],
           ),
@@ -221,11 +231,15 @@ class AIReviewPanel extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(strokeWidth: 3),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.5),
+            ),
             const SizedBox(height: AppTheme.space16),
             Text(
-              'AI đang đánh giá 7 tiêu chí cho ${requirement!.id}...',
-              style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+              'Đang đánh giá 7 tiêu chí cho ${requirement!.id}...',
+              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -241,21 +255,14 @@ class AIReviewPanel extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(AppTheme.space16),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(LucideIcons.sparkle, size: 32, color: AppTheme.primary),
-              ),
-              const SizedBox(height: AppTheme.space16),
+              const Icon(LucideIcons.shieldAlert, size: 28, color: AppTheme.textMuted),
+              const SizedBox(height: AppTheme.space12),
               Text(
-                'Chưa có đánh giá AI cho ${requirement!.id}',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                'Chưa có đánh giá cho ${requirement!.id}',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppTheme.space8),
+              const SizedBox(height: 6),
               const Text(
                 'Nhấn nút bên dưới hoặc phím Ctrl + Enter để tiến hành đánh giá 7 tiêu chí chất lượng tự động.',
                 style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
@@ -266,7 +273,7 @@ class AIReviewPanel extends ConsumerWidget {
                 onPressed: () {
                   ref.read(aiReviewProvider.notifier).analyzeRequirement(requirement!);
                 },
-                icon: const Icon(LucideIcons.play, size: 14),
+                icon: const Icon(LucideIcons.play, size: 13),
                 label: const Text('Phân tích Requirement này'),
               ),
             ],
@@ -277,21 +284,21 @@ class AIReviewPanel extends ConsumerWidget {
 
     // Has Review Result
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.space16),
+      padding: const EdgeInsets.all(AppTheme.space12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 1. Overall Score Card
           _buildOverallScoreCard(review),
-          const SizedBox(height: AppTheme.space16),
+          const SizedBox(height: AppTheme.space12),
 
           // 2. 7 Quality Dimensions Breakdown
           _buildQualityDimensionsCard(review.scores),
-          const SizedBox(height: AppTheme.space16),
+          const SizedBox(height: AppTheme.space12),
 
           // 3. Issues Found
           _buildIssuesCard(review.issues),
-          const SizedBox(height: AppTheme.space16),
+          const SizedBox(height: AppTheme.space12),
 
           // 4. Suggested Revision
           if (review.suggestedRevision != null && review.suggestedRevision!.isNotEmpty)
@@ -318,28 +325,27 @@ class AIReviewPanel extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
-        color: scoreColor.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: scoreColor.withValues(alpha: 0.3)),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: scoreColor.withValues(alpha: 0.15),
-              border: Border.all(color: scoreColor, width: 2),
+              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+              color: scoreColor.withValues(alpha: 0.08),
+              border: Border.all(color: scoreColor.withValues(alpha: 0.25)),
             ),
             child: Center(
               child: Text(
                 '${review.overallScore}',
                 style: TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: scoreColor,
-                  fontFamily: 'JetBrainsMono',
                 ),
               ),
             ),
@@ -352,25 +358,25 @@ class AIReviewPanel extends ConsumerWidget {
                 const Text(
                   'OVERALL SCORE',
                   style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.textMuted,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.6,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
                   scoreGrade,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: scoreColor,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   '${review.issues.length} vấn đề được phát hiện',
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
                 ),
               ],
             ),
@@ -382,10 +388,10 @@ class AIReviewPanel extends ConsumerWidget {
 
   Widget _buildQualityDimensionsCard(QualityScores scores) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space16),
+      padding: const EdgeInsets.all(AppTheme.space14),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -393,13 +399,13 @@ class AIReviewPanel extends ConsumerWidget {
         children: [
           const Row(
             children: [
-              Icon(LucideIcons.barChart2, size: 16, color: AppTheme.primary),
+              Icon(LucideIcons.barChart3, size: 15, color: AppTheme.primary),
               SizedBox(width: AppTheme.space8),
               Text(
                 '7 Tiêu chí chất lượng (FR-013)',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
@@ -429,7 +435,7 @@ class AIReviewPanel extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -441,21 +447,20 @@ class AIReviewPanel extends ConsumerWidget {
                 '$score/100',
                 style: TextStyle(
                   fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: barColor,
-                  fontFamily: 'JetBrainsMono',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           ClipRRect(
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: score / 100,
-              backgroundColor: AppTheme.background,
+              backgroundColor: AppTheme.surfaceSubtle,
               color: barColor,
-              minHeight: 5,
+              minHeight: 4,
             ),
           ),
         ],
@@ -465,10 +470,10 @@ class AIReviewPanel extends ConsumerWidget {
 
   Widget _buildIssuesCard(List<ReviewIssue> issues) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space16),
+      padding: const EdgeInsets.all(AppTheme.space14),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         border: Border.all(color: AppTheme.border),
       ),
       child: Column(
@@ -476,13 +481,13 @@ class AIReviewPanel extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(LucideIcons.alertTriangle, size: 16, color: AppTheme.statusNeedsReview),
+              const Icon(LucideIcons.alertTriangle, size: 15, color: AppTheme.statusNeedsReview),
               const SizedBox(width: AppTheme.space8),
               const Text(
                 'Danh sách vấn đề (Issues)',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
@@ -491,36 +496,42 @@ class AIReviewPanel extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: issues.isEmpty
-                      ? AppTheme.statusPassed.withValues(alpha: 0.1)
-                      : AppTheme.statusFailed.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      ? AppTheme.statusPassed.withValues(alpha: 0.08)
+                      : AppTheme.statusFailed.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  border: Border.all(
+                    color: issues.isEmpty
+                        ? AppTheme.statusPassed.withValues(alpha: 0.2)
+                        : AppTheme.statusFailed.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: Text(
                   '${issues.length}',
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: issues.isEmpty ? AppTheme.statusPassed : AppTheme.statusFailed,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.space12),
+          const SizedBox(height: 10),
           if (issues.isEmpty)
             Container(
               padding: const EdgeInsets.all(AppTheme.space12),
               decoration: BoxDecoration(
-                color: AppTheme.statusPassed.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                color: AppTheme.surfaceSubtle,
+                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                border: Border.all(color: AppTheme.border),
               ),
               child: const Row(
                 children: [
-                  Icon(LucideIcons.check, size: 16, color: AppTheme.statusPassed),
+                  Icon(LucideIcons.check, size: 15, color: AppTheme.statusPassed),
                   SizedBox(width: AppTheme.space8),
                   Expanded(
                     child: Text(
-                      'Tuyệt vời! Không phát hiện lỗi chất lượng nghiêm trọng nào.',
+                      'Không phát hiện lỗi chất lượng nghiêm trọng nào.',
                       style: TextStyle(fontSize: 12, color: AppTheme.statusPassed),
                     ),
                   ),
@@ -532,7 +543,7 @@ class AIReviewPanel extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: issues.length,
-              separatorBuilder: (context, index) => const SizedBox(height: AppTheme.space8),
+              separatorBuilder: (context, index) => const SizedBox(height: 6),
               itemBuilder: (context, index) {
                 final issue = issues[index];
                 Color sevColor;
@@ -544,15 +555,15 @@ class AIReviewPanel extends ConsumerWidget {
                     sevColor = AppTheme.statusNeedsReview;
                     break;
                   case IssueSeverity.low:
-                    sevColor = Colors.blueGrey;
+                    sevColor = AppTheme.severityLow;
                     break;
                 }
 
                 return Container(
-                  padding: const EdgeInsets.all(AppTheme.space8),
+                  padding: const EdgeInsets.all(AppTheme.space10),
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    color: AppTheme.surfaceSubtle,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     border: Border.all(color: AppTheme.border),
                   ),
                   child: Column(
@@ -561,27 +572,32 @@ class AIReviewPanel extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                             decoration: BoxDecoration(
                               color: sevColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: sevColor.withValues(alpha: 0.25)),
                             ),
                             child: Text(
                               issue.severity.label.toUpperCase(),
                               style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
                                 color: sevColor,
+                                letterSpacing: 0.3,
                               ),
                             ),
                           ),
                           const SizedBox(width: AppTheme.space8),
-                          Text(
-                            issue.type,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
+                          Expanded(
+                            child: Text(
+                              issue.type,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -592,7 +608,7 @@ class AIReviewPanel extends ConsumerWidget {
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
-                          height: 1.3,
+                          height: 1.35,
                         ),
                       ),
                     ],
@@ -607,24 +623,24 @@ class AIReviewPanel extends ConsumerWidget {
 
   Widget _buildSuggestedRevisionCard(BuildContext context, WidgetRef ref, String suggestedText) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space16),
+      padding: const EdgeInsets.all(AppTheme.space14),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+        border: Border.all(color: AppTheme.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(LucideIcons.sparkles, size: 16, color: AppTheme.primary),
+              const Icon(LucideIcons.fileCheck2, size: 15, color: AppTheme.primary),
               const SizedBox(width: AppTheme.space8),
               const Text(
-                'Đề xuất cải tiến (Suggested Revision)',
+                'Đề xuất cải tiến (Suggestion)',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
@@ -633,6 +649,8 @@ class AIReviewPanel extends ConsumerWidget {
                 icon: const Icon(LucideIcons.copy, size: 14, color: AppTheme.textSecondary),
                 tooltip: 'Sao chép',
                 splashRadius: 16,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: suggestedText));
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -642,12 +660,12 @@ class AIReviewPanel extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.space8),
+          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.all(AppTheme.space12),
+            padding: const EdgeInsets.all(AppTheme.space10),
             decoration: BoxDecoration(
-              color: AppTheme.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              color: AppTheme.surfaceSubtle,
+              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
               border: Border.all(color: AppTheme.border),
             ),
             child: Text(
@@ -655,11 +673,11 @@ class AIReviewPanel extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 12,
                 color: AppTheme.textPrimary,
-                height: 1.4,
+                height: 1.45,
               ),
             ),
           ),
-          const SizedBox(height: AppTheme.space12),
+          const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton.icon(
@@ -668,9 +686,13 @@ class AIReviewPanel extends ConsumerWidget {
                 backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                ),
+                elevation: 0,
               ),
-              icon: const Icon(LucideIcons.checkCheck, size: 14),
-              label: const Text('Áp dụng đề xuất này', style: TextStyle(fontSize: 12)),
+              icon: const Icon(LucideIcons.checkCheck, size: 13),
+              label: const Text('Apply suggestion', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
             ),
           ),
         ],
@@ -682,11 +704,12 @@ class AIReviewPanel extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusDialog)),
         title: const Row(
           children: [
-            Icon(LucideIcons.helpCircle, color: AppTheme.primary, size: 20),
+            Icon(LucideIcons.helpCircle, color: AppTheme.primary, size: 18),
             SizedBox(width: 8),
-            Text('Xác nhận áp dụng đề xuất', style: TextStyle(fontSize: 16)),
+            Text('Xác nhận áp dụng đề xuất', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           ],
         ),
         content: Column(
@@ -695,19 +718,19 @@ class AIReviewPanel extends ConsumerWidget {
           children: [
             const Text(
               'Bạn có chắc chắn muốn thay thế mô tả hiện tại của Requirement bằng nội dung đề xuất từ AI không?',
-              style: TextStyle(fontSize: 13),
+              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: AppTheme.background,
-                borderRadius: BorderRadius.circular(6),
+                color: AppTheme.surfaceSubtle,
+                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                 border: Border.all(color: AppTheme.border),
               ),
               child: Text(
                 suggestedText,
-                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.textPrimary),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -748,41 +771,36 @@ class AIReviewPanel extends ConsumerWidget {
         color: AppTheme.surface,
         border: Border(top: BorderSide(color: AppTheme.border)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: (!hasDoc || aiState.isAnalyzing || aiState.isBatchAnalyzing)
-                      ? null
-                      : () {
-                          ref.read(aiReviewProvider.notifier).analyzeAllRequirements();
-                        },
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  icon: const Icon(LucideIcons.layers, size: 14),
-                  label: Text('Batch AI ($reqCount)', style: const TextStyle(fontSize: 12)),
-                ),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: (!hasDoc || aiState.isAnalyzing || aiState.isBatchAnalyzing)
+                  ? null
+                  : () {
+                      ref.read(aiReviewProvider.notifier).analyzeAllRequirements();
+                    },
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 9),
               ),
-              const SizedBox(width: AppTheme.space8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: (requirement == null || aiState.isAnalyzing || aiState.isBatchAnalyzing)
-                      ? null
-                      : () {
-                          ref.read(aiReviewProvider.notifier).analyzeRequirement(requirement!);
-                        },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                  ),
-                  icon: const Icon(LucideIcons.sparkles, size: 14),
-                  label: const Text('Phân tích (Ctrl+↵)', style: TextStyle(fontSize: 12)),
-                ),
+              icon: const Icon(LucideIcons.layers, size: 14),
+              label: Text('Batch AI ($reqCount)', style: const TextStyle(fontSize: 12)),
+            ),
+          ),
+          const SizedBox(width: AppTheme.space8),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: (requirement == null || aiState.isAnalyzing || aiState.isBatchAnalyzing)
+                  ? null
+                  : () {
+                      ref.read(aiReviewProvider.notifier).analyzeRequirement(requirement!);
+                    },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 9),
               ),
-            ],
+              icon: const Icon(LucideIcons.play, size: 14),
+              label: const Text('Phân tích (Ctrl+↵)', style: TextStyle(fontSize: 12)),
+            ),
           ),
         ],
       ),
