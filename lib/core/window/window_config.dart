@@ -11,24 +11,19 @@ class WindowConfig {
   /// Setup and initialize Windows desktop window parameters according to NFR-003.
   static Future<void> initializeWindow() async {
     if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      WidgetsFlutterBinding.ensureInitialized();
-      await windowManager.ensureInitialized();
+      try {
+        WidgetsFlutterBinding.ensureInitialized();
+        await windowManager.ensureInitialized();
 
-      const windowOptions = WindowOptions(
-        size: defaultWindowSize,
-        minimumSize: minWindowSize,
-        center: true,
-        backgroundColor: Colors.transparent,
-        skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
-        title: appTitle,
-      );
-
-      await windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.setTitle(appTitle);
+        await windowManager.setMinimumSize(minWindowSize);
+        await windowManager.setSize(defaultWindowSize);
+        await windowManager.center();
         await windowManager.show();
         await windowManager.focus();
-      });
+      } catch (e) {
+        debugPrint('Window manager error: $e');
+      }
     }
   }
 }

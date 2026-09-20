@@ -19,9 +19,8 @@ import 'presentation/widgets/requirement_detail_panel.dart';
 import 'presentation/widgets/left_sidebar/requirements_list_panel.dart';
 
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await WindowConfig.initializeWindow();
 
   runApp(
     const ProviderScope(
@@ -55,6 +54,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedTabIndex = 0; // 0 = Workspace, 1 = Dashboard
 
   @override
+  void initState() {
+    super.initState();
+    WindowConfig.initializeWindow();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final docState = ref.watch(documentProvider);
     final aiConfig = ref.watch(aiConfigProvider);
@@ -78,38 +83,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             appBar: AppBar(
               backgroundColor: AppTheme.surface,
               elevation: 0,
-              title: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(LucideIcons.fileSearch,
-                      color: AppTheme.primary, size: 22),
-                  const SizedBox(width: AppTheme.space12),
-                  const Flexible(
-                    child: Text(
+              title: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.fileSearch,
+                        color: AppTheme.primary, size: 20),
+                    const SizedBox(width: AppTheme.space8),
+                    const Text(
                       'Capstone Requirements Review',
-                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
                     ),
-                  ),
-                  if (docState.hasDocument) ...[
-                    const SizedBox(width: AppTheme.space24),
-                    _buildNavTab(
-                      index: 0,
-                      icon: LucideIcons.layoutGrid,
-                      label: 'Workspace',
-                    ),
-                    const SizedBox(width: AppTheme.space8),
-                    _buildNavTab(
-                      index: 1,
-                      icon: LucideIcons.barChart3,
-                      label: 'Dashboard',
-                    ),
+                    if (docState.hasDocument) ...[
+                      const SizedBox(width: AppTheme.space16),
+                      _buildNavTab(
+                        index: 0,
+                        icon: LucideIcons.layoutGrid,
+                        label: 'Workspace',
+                      ),
+                      const SizedBox(width: AppTheme.space8),
+                      _buildNavTab(
+                        index: 1,
+                        icon: LucideIcons.barChart3,
+                        label: 'Dashboard',
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
               actions: [
                 if (docState.hasDocument) ...[
@@ -133,7 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       elevation: 0,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.space12),
+                  const SizedBox(width: AppTheme.space8),
                 ],
                 // AI Status Pill
                 Padding(
@@ -143,7 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppTheme.primary.withValues(alpha: 0.08),
                         borderRadius:
@@ -156,13 +161,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           const Icon(LucideIcons.sparkles,
                               size: 14, color: AppTheme.primary),
-                          const SizedBox(width: 6),
-                          Text(
-                            'AI: ${aiConfig.provider.label}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.primary,
+                          const SizedBox(width: 4),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 160),
+                            child: Text(
+                              'AI: ${aiConfig.provider.label}',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppTheme.primary,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 4),
@@ -173,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: AppTheme.space12),
+                const SizedBox(width: AppTheme.space8),
                 if (docState.hasDocument) ...[
                   OutlinedButton.icon(
                     onPressed: () {
@@ -216,7 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.space12,
+          horizontal: AppTheme.space8,
           vertical: AppTheme.space8,
         ),
         decoration: BoxDecoration(
@@ -442,6 +452,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               border: Border.all(color: AppTheme.border),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(LucideIcons.listOrdered,
                     size: 16, color: AppTheme.textSecondary),

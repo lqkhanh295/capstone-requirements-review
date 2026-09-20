@@ -5,6 +5,17 @@ enum AIProviderType {
   gemini,
   openai;
 
+  String get name {
+    switch (this) {
+      case AIProviderType.mock:
+        return 'mock';
+      case AIProviderType.gemini:
+        return 'gemini';
+      case AIProviderType.openai:
+        return 'openai';
+    }
+  }
+
   String get label {
     switch (this) {
       case AIProviderType.mock:
@@ -21,7 +32,7 @@ enum AIProviderType {
       case AIProviderType.mock:
         return 'rule-based-v1';
       case AIProviderType.gemini:
-        return 'gemini-1.5-flash';
+        return 'gemini-3.5-flash-lite';
       case AIProviderType.openai:
         return 'gpt-4o-mini';
     }
