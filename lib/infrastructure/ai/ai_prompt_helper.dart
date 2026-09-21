@@ -2,44 +2,44 @@ import 'dart:convert';
 import '../../domain/models/models.dart';
 
 class AIPromptHelper {
-  static const String systemInstruction = '''
-You are an expert Software Requirements Quality Assurance Auditor.
-Your task is to analyze software requirements specifications according to IEEE-830 / ISO/IEC/IEEE 29148 standards.
+  static String get systemInstruction => buildSystemInstruction(Rubric.fptCapstone);
 
-Evaluate the requirement against 7 key dimensions:
-1. Clarity (0-100): Clear, unambiguous language, active voice, easy to understand.
-2. Completeness (0-100): Specifies actor, action, trigger/precondition, and expected outcome/error handling.
-3. Testability (0-100): Measurable, verifiable pass/fail criteria and quantifiable metrics.
-4. Consistency (0-100): Free from internal contradictions or conflicts.
-5. Feasibility (0-100): Technically realistic and achievable.
-6. Ambiguity (0-100): Absence of vague terms like "fast", "user-friendly", "flexible", "etc.".
-7. Duplication (0-100): Unique scope without redundant overlapping requirements.
-
-You must respond STRICTLY with valid JSON matching the following structure without any markdown wrap or extra commentary:
-{
-  "overallScore": 85,
-  "scores": {
-    "clarity": 85,
-    "completeness": 80,
-    "testability": 90,
-    "consistency": 95,
-    "feasibility": 90,
-    "ambiguity": 80,
-    "duplication": 95
-  },
-  "issues": [
-    {
-      "type": "Ambiguity",
-      "severity": "medium",
-      "description": "The term 'quickly' is subjective and unverifiable."
-    }
-  ],
-  "suggestedRevision": "The system shall process and display search query results within 500 milliseconds under normal load."
-}
-''';
-
-  static String buildUserPrompt(Requirement req, {List<Requirement>? allRequirements}) {
+  static String buildSystemInstruction([Rubric? rubric]) {
+    final activeRubric = rubric ?? Rubric.fptCapstone;
     final buffer = StringBuffer();
+    buffer.writeln('You are an expert Software Requirements Quality Assurance Auditor.');
+    buffer.writeln('Your task is to analyze software requirements specifications strictly according to:');
+    buffer.writeln('${activeRubric.name} - ${activeRubric.organization}');
+    buffer.writeln('${activeRubric.description}\n');
+    buffer.writeln('Evaluate the requirement against the following dimensions:');
+    for (int i = 0; i < activeRubric.criteria.length; i++) {
+      final c = activeRubric.criteria[i];
+      buffer.writeln('${i + 1}. ${c.name} (${c.id}) [Weight ${(c.weight * 100).toInt()}%]: ${c.description}. Guidelines: ${c.promptGuideline}');
+    }
+    buffer.writeln('\nYou must respond STRICTLY with valid JSON matching the following structure without any markdown wrap or extra commentary:');
+    buffer.writeln('{');
+    buffer.writeln('  "overallScore": 85,');
+    buffer.writeln('  "scores": {');
+    final scorePairs = activeRubric.criteria.map((c) => '    "${c.id}": 85').join(',\n');
+    buffer.writeln(scorePairs);
+    buffer.writeln('  },');
+    buffer.writeln('  "issues": [');
+    buffer.writeln('    {');
+    buffer.writeln('      "type": "${activeRubric.criteria.first.name}",');
+    buffer.writeln('      "severity": "medium",');
+    buffer.writeln('      "description": "Specific issue description."');
+    buffer.writeln('    }');
+    buffer.writeln('  ],');
+    buffer.writeln('  "suggestedRevision": "The system shall process and display search query results within 500 milliseconds under normal load."');
+    buffer.writeln('}');
+    return buffer.toString();
+  }
+
+  static String buildUserPrompt(Requirement req, {List<Requirement>? allRequirements, Rubric? rubric}) {
+    final buffer = StringBuffer();
+    if (rubric != null) {
+      buffer.writeln('Apply standard: ${rubric.name}');
+    }
     buffer.writeln('Analyze the following requirement:');
     buffer.writeln('ID: ${req.id}');
     buffer.writeln('Type: ${req.type.label}');
@@ -58,7 +58,7 @@ You must respond STRICTLY with valid JSON matching the following structure witho
     return buffer.toString();
   }
 
-  static RequirementReview parseAIResponse(String responseBody) {
+  static RequirementReview parseAIResponse(String responseBody, [Rubric? rubric]) {
     try {
       // Strip markdown code fences if present e.g. ```json ... ```
       var cleaned = responseBody.trim();
@@ -80,7 +80,23 @@ You must respond STRICTLY with valid JSON matching the following structure witho
       }
 
       final Map<String, dynamic> json = jsonDecode(cleaned) as Map<String, dynamic>;
-      return RequirementReview.fromJson(json);
+      final parsedReview = RequirementReview.fromJson(json);
+
+      if (rubric != null && parsedReview.scores.dynamicScores.isNotEmpty) {
+        double weightedSum = 0.0;
+        double totalWeight = 0.0;
+        for (final criterion in rubric.criteria) {
+          final score = parsedReview.scores.getScore(criterion.id);
+          weightedSum += score * criterion.weight;
+          totalWeight += criterion.weight;
+        }
+        if (totalWeight > 0) {
+          final computedOverall = (weightedSum / totalWeight).round();
+          return parsedReview.copyWith(overallScore: computedOverall);
+        }
+      }
+
+      return parsedReview;
     } catch (e) {
       // Fallback in case of parse anomaly
       return RequirementReview(
