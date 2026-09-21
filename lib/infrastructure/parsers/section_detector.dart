@@ -47,7 +47,7 @@ class SectionDetector {
     if (trimmed.isEmpty || trimmed.length > 120) return false;
 
     // A requirement ID is never a section header
-    if (RegExp(r'^(?:\[|\()?(REQ|FR|NFR|BR|TR|SR|PERF|SEC|UC|RQ)[-_ ]?\d+', caseSensitive: false).hasMatch(trimmed)) {
+    if (RegExp(r'^(?:\[|\()?(REQ|FR|NFR|BR|TR|SR|PERF|SEC|UC|RQ|FEAT|FUNC|SYS|CR)[-_ ]?\d+', caseSensitive: false).hasMatch(trimmed)) {
       return false;
     }
 

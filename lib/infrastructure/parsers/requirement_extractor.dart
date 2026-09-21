@@ -3,9 +3,9 @@ import 'section_detector.dart';
 
 class RequirementExtractor {
   // Regex patterns matching existing Requirement IDs:
-  // Examples: REQ-001, REQ_001, FR-001, NFR-001, BR-001, TR-001, SR-001, UC-001, RQ-1
+  // Examples: REQ-001, REQ_001, FR-001, NFR-001, BR-001, TR-001, SR-001, UC-001, RQ-1, FEAT-01, FUNC-01, SYS-01
   static final RegExp idPattern = RegExp(
-    r'(?:\[|\()?(REQ|FR|NFR|BR|TR|SR|PERF|SEC|UC|RQ)[-_ ]?(\d+)(?:\]|\))?',
+    r'(?:\[|\()?(REQ|FR|NFR|BR|TR|SR|PERF|SEC|UC|RQ|FEAT|FUNC|SYS|CR)[-_ ]?(\d+)(?:\]|\))?',
     caseSensitive: false,
   );
 
@@ -345,12 +345,12 @@ class RequirementExtractor {
 
   static RequirementType _inferTypeFromPrefix(String prefix, RequirementType fallback) {
     final p = prefix.toUpperCase();
-    if (p.startsWith('FR')) return RequirementType.functional;
+    if (p.startsWith('FR') || p.startsWith('FUNC') || p.startsWith('FEAT')) return RequirementType.functional;
     if (p.startsWith('NFR')) return RequirementType.nonFunctional;
     if (p.startsWith('SEC') || p.startsWith('SR')) return RequirementType.security;
     if (p.startsWith('PERF')) return RequirementType.performance;
-    if (p.startsWith('BR')) return RequirementType.business;
-    if (p.startsWith('TR')) return RequirementType.technical;
+    if (p.startsWith('BR') || p.startsWith('CR')) return RequirementType.business;
+    if (p.startsWith('TR') || p.startsWith('SYS')) return RequirementType.technical;
     return fallback;
   }
 
