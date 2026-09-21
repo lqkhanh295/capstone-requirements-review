@@ -186,6 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: AppTheme.mono(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
+                        color: AppTheme.surface,
                       ),
                     ),
                   ),

@@ -163,6 +163,7 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
                     style: AppTheme.mono(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
+                      color: AppTheme.surface,
                     ),
                   ),
                 ),

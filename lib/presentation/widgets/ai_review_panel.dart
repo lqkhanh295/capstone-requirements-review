@@ -388,6 +388,7 @@ class AIReviewPanel extends ConsumerWidget {
                   style: AppTheme.mono(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
+                    color: AppTheme.surface,
                   ),
                 ),
               ),
@@ -942,7 +943,11 @@ class AIReviewPanel extends ConsumerWidget {
               ),
               child: Text(
                 '[ Apply revision ]',
-                style: AppTheme.mono(fontSize: 11, fontWeight: FontWeight.w600),
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.surface,
+                ),
               ),
             ),
           ),
@@ -1116,6 +1121,7 @@ class AIReviewPanel extends ConsumerWidget {
                 style: AppTheme.mono(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
+                  color: AppTheme.surface,
                 ),
               ),
             ),

@@ -70,7 +70,7 @@ class AppTheme {
     return GoogleFonts.ibmPlexMono(
       fontSize: fontSize,
       fontWeight: fontWeight,
-      color: color ?? textPrimary,
+      color: color,
       height: height,
       letterSpacing: letterSpacing,
       fontStyle: fontStyle,
@@ -89,7 +89,7 @@ class AppTheme {
     return GoogleFonts.ibmPlexSans(
       fontSize: fontSize,
       fontWeight: fontWeight,
-      color: color ?? textPrimary,
+      color: color,
       height: height,
       letterSpacing: letterSpacing,
       fontStyle: fontStyle,

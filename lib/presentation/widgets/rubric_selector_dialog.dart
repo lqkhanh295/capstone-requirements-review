@@ -481,7 +481,11 @@ class _RubricSelectorDialogState extends ConsumerState<RubricSelectorDialog> {
             icon: const Icon(LucideIcons.check, size: 14),
             label: Text(
               isActive && !_isEditing ? 'Đang kích hoạt' : 'Áp dụng Rubric này',
-              style: AppTheme.sans(fontSize: 12, fontWeight: FontWeight.w600),
+              style: AppTheme.sans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.surface,
+              ),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.textPrimary,
