@@ -1,8 +1,11 @@
+import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
 import 'core/window/window_config.dart';
 import 'domain/models/models.dart';
@@ -52,6 +55,58 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedTabIndex = 0; // 0 = Workspace, 1 = Dashboard
+  bool _isGlobalDragging = false;
+
+  Future<void> _pickNewDocument() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        dialogTitle: 'Chọn tài liệu yêu cầu (SRS)',
+        type: FileType.custom,
+        allowedExtensions: AppConstants.supportedExtensions,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final selectedPath = result.files.first.path;
+        if (selectedPath != null) {
+          await ref.read(documentProvider.notifier).loadFromFile(selectedPath);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi mở hộp thoại chọn file: $e'),
+            backgroundColor: AppTheme.statusFailed,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleGlobalDrop(DropDoneDetails details) async {
+    if (details.files.isEmpty) return;
+    final xFile = details.files.first;
+    try {
+      final bytes = await xFile.readAsBytes();
+      final path = xFile.path;
+      final name = xFile.name;
+
+      if (path.isNotEmpty) {
+        await ref.read(documentProvider.notifier).loadFromFile(path);
+      } else {
+        await ref.read(documentProvider.notifier).loadFromBytes(bytes, name);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi đọc file kéo thả: $e'),
+            backgroundColor: AppTheme.statusFailed,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -186,9 +241,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(width: AppTheme.space8),
                 if (docState.hasDocument) ...[
                   OutlinedButton.icon(
-                    onPressed: () {
-                      ref.read(documentProvider.notifier).reset();
-                    },
+                    onPressed: _pickNewDocument,
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppTheme.border),
                       padding: const EdgeInsets.symmetric(
@@ -211,7 +264,76 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Divider(height: 1, color: AppTheme.border),
               ),
             ),
-            body: _buildBody(context, docState),
+            body: DropTarget(
+              onDragEntered: (_) => setState(() => _isGlobalDragging = true),
+              onDragExited: (_) => setState(() => _isGlobalDragging = false),
+              onDragDone: (details) {
+                setState(() => _isGlobalDragging = false);
+                _handleGlobalDrop(details);
+              },
+              child: Stack(
+                children: [
+                  Positioned.fill(child: _buildBody(context, docState)),
+                  if (_isGlobalDragging)
+                    Positioned.fill(
+                      child: Container(
+                        color: AppTheme.primary.withValues(alpha: 0.12),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 28,
+                              vertical: 18,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.surface,
+                              borderRadius:
+                                  BorderRadius.circular(AppTheme.radiusCard),
+                              border:
+                                  Border.all(color: AppTheme.primary, width: 2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 20,
+                                  offset: Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(LucideIcons.fileUp,
+                                    color: AppTheme.primary, size: 28),
+                                SizedBox(width: 14),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Thả tệp SRS vào đây',
+                                      style: TextStyle(
+                                        color: AppTheme.textPrimary,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Hỗ trợ PDF, DOCX, TXT, Markdown',
+                                      style: TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
