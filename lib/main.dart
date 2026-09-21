@@ -1,122 +1,482 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import 'core/theme/app_theme.dart';
+import 'core/window/window_config.dart';
+import 'domain/models/models.dart';
+import 'presentation/common/keyboard_shortcuts.dart';
+import 'presentation/dashboard/dashboard_screen.dart';
+import 'presentation/export/export_report_dialog.dart';
+import 'presentation/providers/ai_providers.dart';
+import 'presentation/providers/document_provider.dart';
+import 'presentation/providers/document_state.dart';
+import 'presentation/widgets/ai_review_panel.dart';
+import 'presentation/widgets/ai_settings_dialog.dart';
+import 'presentation/widgets/file_drop_zone.dart';
+import 'presentation/widgets/requirement_detail_panel.dart';
+import 'presentation/widgets/left_sidebar/requirements_list_panel.dart';
+
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    const ProviderScope(
+      child: CapstoneRequirementsApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CapstoneRequirementsApp extends StatelessWidget {
+  const CapstoneRequirementsApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: WindowConfig.appTitle,
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      home: const HomeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedTabIndex = 0; // 0 = Workspace, 1 = Dashboard
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    WindowConfig.initializeWindow();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    final docState = ref.watch(documentProvider);
+    final aiConfig = ref.watch(aiConfigProvider);
+
+    return GlobalKeyboardShortcuts(
+      currentDocument: docState.document,
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.enter, control: true): () {
+            if (docState.selectedRequirement != null) {
+              ref
+                  .read(aiReviewProvider.notifier)
+                  .analyzeRequirement(docState.selectedRequirement!);
+            }
+          },
+        },
+        child: Focus(
+          autofocus: true,
+          child: Scaffold(
+            backgroundColor: AppTheme.background,
+            appBar: AppBar(
+              backgroundColor: AppTheme.surface,
+              elevation: 0,
+              toolbarHeight: 48,
+              title: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.fileSearch,
+                        color: AppTheme.primary, size: 18),
+                    const SizedBox(width: AppTheme.space8),
+                    const Text(
+                      'Capstone Requirements Review',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    if (docState.hasDocument) ...[
+                      const SizedBox(width: AppTheme.space16),
+                      _buildNavTab(
+                        index: 0,
+                        icon: LucideIcons.layoutGrid,
+                        label: 'Workspace',
+                      ),
+                      const SizedBox(width: 4),
+                      _buildNavTab(
+                        index: 1,
+                        icon: LucideIcons.barChart3,
+                        label: 'Dashboard',
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                if (docState.hasDocument) ...[
+                  // Quick Export Button
+                  ElevatedButton.icon(
+                    onPressed: () =>
+                        ExportReportDialog.show(context, docState.document!),
+                    icon: const Icon(LucideIcons.download, size: 14),
+                    label: const Text('Export (Ctrl+E)', style: TextStyle(fontSize: 12)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusButton),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.space8),
+                ],
+                // AI Status Pill
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  child: InkWell(
+                    onTap: () => AISettingsDialog.show(context),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceSubtle,
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusPill),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(LucideIcons.bot,
+                              size: 13, color: AppTheme.textSecondary),
+                          const SizedBox(width: 5),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 150),
+                            child: Text(
+                              'AI: ${aiConfig.provider.label}',
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          const Icon(LucideIcons.chevronDown,
+                              size: 12, color: AppTheme.textMuted),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppTheme.space8),
+                if (docState.hasDocument) ...[
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      ref.read(documentProvider.notifier).reset();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppTheme.border),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusButton),
+                      ),
+                    ),
+                    icon: const Icon(LucideIcons.folderOpen, size: 14),
+                    label: const Text('Mở tài liệu khác', style: TextStyle(fontSize: 12)),
+                  ),
+                  const SizedBox(width: AppTheme.space12),
+                ],
+              ],
+              bottom: const PreferredSize(
+                preferredSize: Size.fromHeight(1),
+                child: Divider(height: 1, color: AppTheme.border),
+              ),
+            ),
+            body: _buildBody(context, docState),
+          ),
+        ),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+    );
+  }
+
+  Widget _buildNavTab({
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = _selectedTabIndex == index;
+
+    return InkWell(
+      onTap: () => setState(() => _selectedTabIndex = index),
+      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 6,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primarySoft
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('You have pushed the button this many times:'),
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 6),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, DocumentState state) {
+    if (state.isLoading) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(strokeWidth: 3),
+            const SizedBox(height: AppTheme.space16),
+            Text(
+              state.loadingMessage ?? 'Đang xử lý tài liệu...',
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!state.hasDocument) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppTheme.space32),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 680),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (state.errorMessage != null) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: AppTheme.space24),
+                    padding: const EdgeInsets.all(AppTheme.space16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.statusFailed.withValues(alpha: 0.08),
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.radiusMedium),
+                      border: Border.all(
+                        color: AppTheme.statusFailed.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(LucideIcons.alertCircle,
+                            color: AppTheme.statusFailed, size: 20),
+                        const SizedBox(width: AppTheme.space12),
+                        Expanded(
+                          child: Text(
+                            state.errorMessage!,
+                            style: const TextStyle(
+                              color: AppTheme.statusFailed,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const Text(
+                  'Nhập tài liệu yêu cầu (SRS)',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Tải lên tài liệu phần mềm của bạn để tự động nhận diện phân đoạn và bóc tách các Requirements.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppTheme.space24),
+                const FileDropZone(),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_selectedTabIndex == 1 && state.hasDocument) {
+      return DashboardScreen(
+        document: state.document!,
+        onNavigateToRequirement: (reqId) {
+          final found = state.document!.requirements.firstWhere(
+            (r) => r.id == reqId,
+            orElse: () => state.document!.requirements.first,
+          );
+          ref.read(documentProvider.notifier).selectRequirement(found);
+          setState(() {
+            _selectedTabIndex = 0;
+          });
+        },
+      );
+    }
+
+    // Tab 0: Document loaded state with 3-column workspace layout
+    final doc = state.document!;
+    return Column(
+      children: [
+        _buildDocumentHeader(doc),
+        Expanded(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Left Column: Requirements List
+              const RequirementsListPanel(),
+              const VerticalDivider(width: 1),
+              // Middle Column: Requirement Detail & Manual Review
+              const Expanded(
+                child: RequirementDetailPanel(),
+              ),
+              const VerticalDivider(width: 1),
+              // Right Column: AI Review Panel
+              AIReviewPanel(
+                requirement: state.selectedRequirement,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDocumentHeader(Document doc) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.space20,
+        vertical: 10,
+      ),
+      decoration: const BoxDecoration(
+        color: AppTheme.surface,
+        border: Border(
+          bottom: BorderSide(color: AppTheme.border),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.primarySoft,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+            ),
+            child: Text(
+              doc.fileType.toUpperCase(),
+              style: const TextStyle(
+                color: AppTheme.primary,
+                fontWeight: FontWeight.w700,
+                fontSize: 10,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppTheme.space12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  doc.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  '${(doc.fileSize / 1024).toStringAsFixed(1)} KB • Đường dẫn: ${doc.filePath}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textMuted,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceSubtle,
+              borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(LucideIcons.listOrdered,
+                    size: 14, color: AppTheme.textSecondary),
+                const SizedBox(width: 5),
+                Text(
+                  '${doc.requirements.length} Requirements',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
 }
