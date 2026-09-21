@@ -376,12 +376,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               // Left Column: Requirements List
               const RequirementsListPanel(),
-              const VerticalDivider(width: 1),
               // Middle Column: Requirement Detail & Manual Review
               const Expanded(
                 child: RequirementDetailPanel(),
               ),
-              const VerticalDivider(width: 1),
               // Right Column: AI Review Panel
               AIReviewPanel(
                 requirement: state.selectedRequirement,
