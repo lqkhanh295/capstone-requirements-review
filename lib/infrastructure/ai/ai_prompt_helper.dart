@@ -16,21 +16,34 @@ class AIPromptHelper {
       final c = activeRubric.criteria[i];
       buffer.writeln('${i + 1}. ${c.name} (${c.id}) [Weight ${(c.weight * 100).toInt()}%]: ${c.description}. Guidelines: ${c.promptGuideline}');
     }
-    buffer.writeln('\nYou must respond STRICTLY with valid JSON matching the following structure without any markdown wrap or extra commentary:');
+
+    buffer.writeln('\n### SCORING RULES (0 to 100 for each dimension):');
+    buffer.writeln('- 90 - 100: Excellent / Complete. Fully satisfies all aspects of this dimension without ambiguity.');
+    buffer.writeln('- 75 - 89: Good. Acceptable for implementation, but has minor phrasing or detail improvements needed.');
+    buffer.writeln('- 50 - 74: Weak / Needs Review. Missing key actor, vague terms, missing error/edge conditions, or difficult to test.');
+    buffer.writeln('- 10 - 49: Critical defects. Untestable, severely ambiguous, contradictory, or impossible.');
+
+    buffer.writeln('\nCRITICAL SCORING INSTRUCTIONS:');
+    buffer.writeln('1. You must carefully inspect the requirement text and score each dimension individually with its OWN realistic score (0-100) reflecting its actual quality.');
+    buffer.writeln('2. Do NOT output the same score for all dimensions! Each criterion must reflect its specific evaluation.');
+    buffer.writeln('3. For every dimension where you deduct points (score < 80), you MUST include a corresponding issue in the "issues" array.');
+    buffer.writeln('4. "overallScore" must be the calculated weighted sum of dimension scores.');
+
+    buffer.writeln('\nRespond STRICTLY with valid JSON matching the following structure without any markdown wrap or extra commentary:');
     buffer.writeln('{');
-    buffer.writeln('  "overallScore": 85,');
+    buffer.writeln('  "overallScore": <integer between 0 and 100>,');
     buffer.writeln('  "scores": {');
-    final scorePairs = activeRubric.criteria.map((c) => '    "${c.id}": 85').join(',\n');
+    final scorePairs = activeRubric.criteria.map((c) => '    "${c.id}": <integer 0-100>').join(',\n');
     buffer.writeln(scorePairs);
     buffer.writeln('  },');
     buffer.writeln('  "issues": [');
     buffer.writeln('    {');
     buffer.writeln('      "type": "${activeRubric.criteria.first.name}",');
     buffer.writeln('      "severity": "medium",');
-    buffer.writeln('      "description": "Specific issue description."');
+    buffer.writeln('      "description": "Specific issue description explaining why points were deducted."');
     buffer.writeln('    }');
     buffer.writeln('  ],');
-    buffer.writeln('  "suggestedRevision": "The system shall process and display search query results within 500 milliseconds under normal load."');
+    buffer.writeln('  "suggestedRevision": "Concrete, measurable, professional revision of the requirement."');
     buffer.writeln('}');
     return buffer.toString();
   }
@@ -38,7 +51,7 @@ class AIPromptHelper {
   static String buildUserPrompt(Requirement req, {List<Requirement>? allRequirements, Rubric? rubric}) {
     final buffer = StringBuffer();
     if (rubric != null) {
-      buffer.writeln('Apply standard: ${rubric.name}');
+      buffer.writeln('Standard to evaluate: ${rubric.name}');
     }
     buffer.writeln('Analyze the following requirement:');
     buffer.writeln('ID: ${req.id}');
@@ -55,6 +68,7 @@ class AIPromptHelper {
       }
     }
 
+    buffer.writeln('\nReminder: Objectively evaluate each dimension with individual scores (0-100). Do not repeat identical scores across dimensions.');
     return buffer.toString();
   }
 

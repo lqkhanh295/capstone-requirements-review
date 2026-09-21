@@ -141,28 +141,32 @@ class QualityScores {
   }
 
   factory QualityScores.fromJson(Map<String, dynamic> json) {
+    int? parseNum(dynamic v) {
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v.trim());
+      return null;
+    }
+
     final dyn = <String, int>{};
     if (json.containsKey('dynamicScores') && json['dynamicScores'] is Map) {
       final nested = json['dynamicScores'] as Map<String, dynamic>;
       for (final entry in nested.entries) {
-        if (entry.value is num) {
-          dyn[entry.key] = (entry.value as num).toInt();
-        }
+        final parsed = parseNum(entry.value);
+        if (parsed != null) dyn[entry.key] = parsed;
       }
     }
     for (final entry in json.entries) {
-      if (entry.value is num) {
-        dyn[entry.key] = (entry.value as num).toInt();
-      }
+      final parsed = parseNum(entry.value);
+      if (parsed != null) dyn[entry.key] = parsed;
     }
 
-    final clarityVal = (json['clarity'] as num?)?.toInt() ?? dyn['clarity_consistency'] ?? dyn['clarity'] ?? 80;
-    final compVal = (json['completeness'] as num?)?.toInt() ?? dyn['crud_completeness'] ?? dyn['completeness'] ?? 80;
-    final testVal = (json['testability'] as num?)?.toInt() ?? dyn['testable'] ?? dyn['testability'] ?? 80;
-    final consVal = (json['consistency'] as num?)?.toInt() ?? dyn['clarity_consistency'] ?? dyn['consistency'] ?? 80;
-    final feasVal = (json['feasibility'] as num?)?.toInt() ?? dyn['feasibility_security'] ?? dyn['feasibility'] ?? 80;
-    final ambVal = (json['ambiguity'] as num?)?.toInt() ?? dyn['ambiguity'] ?? 85;
-    final dupVal = (json['duplication'] as num?)?.toInt() ?? dyn['duplication'] ?? 90;
+    final clarityVal = parseNum(json['clarity']) ?? dyn['clarity_consistency'] ?? dyn['clarity'] ?? 80;
+    final compVal = parseNum(json['completeness']) ?? dyn['crud_completeness'] ?? dyn['completeness'] ?? 80;
+    final testVal = parseNum(json['testability']) ?? dyn['testable'] ?? dyn['testability'] ?? 80;
+    final consVal = parseNum(json['consistency']) ?? dyn['clarity_consistency'] ?? dyn['consistency'] ?? 80;
+    final feasVal = parseNum(json['feasibility']) ?? dyn['feasibility_security'] ?? dyn['feasibility'] ?? 80;
+    final ambVal = parseNum(json['ambiguity']) ?? dyn['ambiguity'] ?? 80;
+    final dupVal = parseNum(json['duplication']) ?? dyn['duplication'] ?? 80;
 
     return QualityScores(
       clarity: clarityVal,
@@ -219,8 +223,15 @@ class RequirementReview {
     final scoresData = json['scores'] as Map<String, dynamic>? ?? {};
     final issuesData = (json['issues'] as List<dynamic>?) ?? [];
 
+    int overall = 0;
+    if (json['overallScore'] is num) {
+      overall = (json['overallScore'] as num).toInt();
+    } else if (json['overallScore'] is String) {
+      overall = int.tryParse((json['overallScore'] as String).trim()) ?? 0;
+    }
+
     return RequirementReview(
-      overallScore: (json['overallScore'] as num?)?.toInt() ?? 0,
+      overallScore: overall,
       scores: QualityScores.fromJson(scoresData),
       issues: issuesData
           .map((item) => ReviewIssue.fromJson(item as Map<String, dynamic>))
