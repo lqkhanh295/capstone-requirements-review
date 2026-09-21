@@ -19,6 +19,7 @@ class WindowConfig {
         await windowManager.setMinimumSize(minWindowSize);
         await windowManager.setSize(defaultWindowSize);
         await windowManager.center();
+        await windowManager.maximize();
         await windowManager.show();
         await windowManager.focus();
       } catch (e) {
