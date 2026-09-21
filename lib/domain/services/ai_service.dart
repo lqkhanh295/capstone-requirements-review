@@ -3,7 +3,8 @@ import '../models/models.dart';
 enum AIProviderType {
   mock,
   gemini,
-  openai;
+  openai,
+  ollama;
 
   String get name {
     switch (this) {
@@ -13,6 +14,8 @@ enum AIProviderType {
         return 'gemini';
       case AIProviderType.openai:
         return 'openai';
+      case AIProviderType.ollama:
+        return 'ollama';
     }
   }
 
@@ -24,6 +27,8 @@ enum AIProviderType {
         return 'Google Gemini AI';
       case AIProviderType.openai:
         return 'OpenAI GPT';
+      case AIProviderType.ollama:
+        return 'Ollama (Local LLM)';
     }
   }
 
@@ -35,6 +40,8 @@ enum AIProviderType {
         return 'gemini-3.5-flash-lite';
       case AIProviderType.openai:
         return 'gpt-4o-mini';
+      case AIProviderType.ollama:
+        return 'qwen2.5-coder:3b';
     }
   }
 }
@@ -57,6 +64,19 @@ class AIServiceConfig {
   });
 
   String get effectiveModel => model.isNotEmpty ? model : provider.defaultModel;
+
+  String get effectiveBaseUrl {
+    if (baseUrl != null && baseUrl!.trim().isNotEmpty) {
+      return baseUrl!.trim();
+    }
+    if (provider == AIProviderType.ollama) {
+      return 'http://127.0.0.1:11434';
+    }
+    if (provider == AIProviderType.openai) {
+      return 'https://api.openai.com/v1';
+    }
+    return '';
+  }
 
   AIServiceConfig copyWith({
     AIProviderType? provider,

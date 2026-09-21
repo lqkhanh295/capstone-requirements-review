@@ -1,6 +1,7 @@
 import '../../domain/services/ai_service.dart';
 import 'gemini_ai_service.dart';
 import 'mock_ai_service.dart';
+import 'ollama_ai_service.dart';
 import 'openai_ai_service.dart';
 
 class AIServiceFactory {
@@ -10,6 +11,8 @@ class AIServiceFactory {
         return GeminiAIService(config: config);
       case AIProviderType.openai:
         return OpenAIAIService(config: config);
+      case AIProviderType.ollama:
+        return OllamaAIService(config: config);
       case AIProviderType.mock:
         return MockAIService();
     }

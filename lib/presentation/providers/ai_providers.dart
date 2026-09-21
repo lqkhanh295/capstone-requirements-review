@@ -27,6 +27,7 @@ class AIConfigNotifier extends Notifier<AIServiceConfig> {
     state = state.copyWith(
       provider: provider,
       model: provider.defaultModel,
+      baseUrl: provider == AIProviderType.ollama ? 'http://127.0.0.1:11434' : null,
     );
   }
 

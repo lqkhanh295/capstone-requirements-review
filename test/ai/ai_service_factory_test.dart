@@ -3,6 +3,7 @@ import 'package:capstone_requirements_review/domain/services/ai_service.dart';
 import 'package:capstone_requirements_review/infrastructure/ai/ai_service_factory.dart';
 import 'package:capstone_requirements_review/infrastructure/ai/gemini_ai_service.dart';
 import 'package:capstone_requirements_review/infrastructure/ai/mock_ai_service.dart';
+import 'package:capstone_requirements_review/infrastructure/ai/ollama_ai_service.dart';
 import 'package:capstone_requirements_review/infrastructure/ai/openai_ai_service.dart';
 
 void main() {
@@ -23,6 +24,12 @@ void main() {
       const config = AIServiceConfig(provider: AIProviderType.openai, apiKey: 'dummy');
       final service = AIServiceFactory.create(config);
       expect(service, isA<OpenAIAIService>());
+    });
+
+    test('creates OllamaAIService when config provider is ollama', () {
+      const config = AIServiceConfig(provider: AIProviderType.ollama);
+      final service = AIServiceFactory.create(config);
+      expect(service, isA<OllamaAIService>());
     });
   });
 }

@@ -52,6 +52,9 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
     setState(() {
       _selectedProvider = newProvider;
       _modelController.text = newProvider.defaultModel;
+      if (newProvider == AIProviderType.ollama && _baseUrlController.text.trim().isEmpty) {
+        _baseUrlController.text = 'http://127.0.0.1:11434';
+      }
     });
   }
 
@@ -148,8 +151,8 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
               ),
               const SizedBox(height: AppTheme.space16),
 
-              // API Key Field (for Gemini / OpenAI)
-              if (_selectedProvider != AIProviderType.mock) ...[
+              // Provider-specific configuration fields
+              if (_selectedProvider == AIProviderType.gemini || _selectedProvider == AIProviderType.openai) ...[
                 Text(
                   '${_selectedProvider == AIProviderType.gemini ? "Gemini" : "OpenAI"} API Key',
                   style: const TextStyle(
@@ -193,6 +196,85 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
                   ),
                 ),
                 const SizedBox(height: AppTheme.space16),
+
+                if (_selectedProvider == AIProviderType.openai) ...[
+                  const Text(
+                    'Base URL (Tùy chọn cho Proxy / Local Gateway)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.space8),
+                  TextField(
+                    controller: _baseUrlController,
+                    decoration: const InputDecoration(
+                      hintText: 'https://api.openai.com/v1',
+                      prefixIcon: Icon(LucideIcons.globe, size: 16),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.space16),
+                ],
+              ] else if (_selectedProvider == AIProviderType.ollama) ...[
+                Container(
+                  padding: const EdgeInsets.all(AppTheme.space12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    border: Border.all(color: AppTheme.primary.withValues(alpha: 0.25)),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(LucideIcons.hardDrive, size: 18, color: AppTheme.primary),
+                      SizedBox(width: AppTheme.space10),
+                      Expanded(
+                        child: Text(
+                          'Ollama chạy trực tiếp trên máy của bạn (Local LLM), hoàn toàn miễn phí, offline và bảo mật tuyệt đối. Không cần API Key.',
+                          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppTheme.space16),
+
+                const Text(
+                  'Ollama Base URL',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppTheme.space8),
+                TextField(
+                  controller: _baseUrlController,
+                  decoration: const InputDecoration(
+                    hintText: 'http://127.0.0.1:11434',
+                    prefixIcon: Icon(LucideIcons.globe, size: 16),
+                  ),
+                ),
+                const SizedBox(height: AppTheme.space16),
+
+                const Text(
+                  'Model Name (đã tải trên Ollama)',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: AppTheme.space8),
+                TextField(
+                  controller: _modelController,
+                  decoration: const InputDecoration(
+                    hintText: 'qwen2.5-coder:3b (hoặc llama3.2, mistral...)',
+                    prefixIcon: Icon(LucideIcons.cpu, size: 16),
+                  ),
+                ),
+                const SizedBox(height: AppTheme.space16),
               ] else ...[
                 Container(
                   padding: const EdgeInsets.all(AppTheme.space12),
@@ -212,27 +294,6 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: AppTheme.space16),
-              ],
-
-              // Custom Base URL (OpenAI only)
-              if (_selectedProvider == AIProviderType.openai) ...[
-                const Text(
-                  'Base URL (Tùy chọn cho Proxy / Ollama / Local LLM)',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: AppTheme.space8),
-                TextField(
-                  controller: _baseUrlController,
-                  decoration: const InputDecoration(
-                    hintText: 'https://api.openai.com/v1',
-                    prefixIcon: Icon(LucideIcons.globe, size: 16),
                   ),
                 ),
                 const SizedBox(height: AppTheme.space16),
