@@ -60,27 +60,56 @@ class QualityScores {
   });
 
   int getScore(String criterionId) {
-    if (dynamicScores.containsKey(criterionId)) {
-      return dynamicScores[criterionId]!;
+    final key = criterionId.toLowerCase().trim();
+    if (dynamicScores.containsKey(key)) {
+      return dynamicScores[key]!;
     }
-    switch (criterionId.toLowerCase()) {
+    for (final entry in dynamicScores.entries) {
+      if (entry.key.toLowerCase().trim() == key) {
+        return entry.value;
+      }
+    }
+
+    switch (key) {
+      // IEEE-830 Standard Dimensions
       case 'clarity':
         return clarity;
       case 'completeness':
-      case 'crud_completeness':
         return completeness;
       case 'testability':
+      case 'testable':
         return testability;
       case 'consistency':
-      case 'clarity_consistency':
         return consistency;
       case 'feasibility':
-      case 'feasibility_security':
         return feasibility;
       case 'ambiguity':
         return ambiguity;
       case 'duplication':
         return duplication;
+
+      // FPT Capstone Dimensions
+      case 'actor_scope':
+        return dynamicScores['actor_scope'] ?? ((clarity * 0.4 + completeness * 0.6).round());
+      case 'crud_completeness':
+        return dynamicScores['crud_completeness'] ?? completeness;
+      case 'clarity_consistency':
+        return dynamicScores['clarity_consistency'] ?? ((clarity + consistency) ~/ 2);
+      case 'feasibility_security':
+        return dynamicScores['feasibility_security'] ?? feasibility;
+
+      // Agile INVEST Dimensions
+      case 'independent':
+        return dynamicScores['independent'] ?? ((consistency + duplication) ~/ 2);
+      case 'valuable':
+        return dynamicScores['valuable'] ?? ((completeness + clarity) ~/ 2);
+      case 'estimable':
+        return dynamicScores['estimable'] ?? ((clarity + testability) ~/ 2);
+      case 'small':
+        return dynamicScores['small'] ?? ((ambiguity + clarity) ~/ 2);
+      case 'negotiable':
+        return dynamicScores['negotiable'] ?? ((consistency + feasibility) ~/ 2);
+
       default:
         if (dynamicScores.isNotEmpty) {
           return dynamicScores.values.reduce((a, b) => a + b) ~/ dynamicScores.length;
@@ -113,6 +142,14 @@ class QualityScores {
 
   factory QualityScores.fromJson(Map<String, dynamic> json) {
     final dyn = <String, int>{};
+    if (json.containsKey('dynamicScores') && json['dynamicScores'] is Map) {
+      final nested = json['dynamicScores'] as Map<String, dynamic>;
+      for (final entry in nested.entries) {
+        if (entry.value is num) {
+          dyn[entry.key] = (entry.value as num).toInt();
+        }
+      }
+    }
     for (final entry in json.entries) {
       if (entry.value is num) {
         dyn[entry.key] = (entry.value as num).toInt();
@@ -121,7 +158,7 @@ class QualityScores {
 
     final clarityVal = (json['clarity'] as num?)?.toInt() ?? dyn['clarity_consistency'] ?? dyn['clarity'] ?? 80;
     final compVal = (json['completeness'] as num?)?.toInt() ?? dyn['crud_completeness'] ?? dyn['completeness'] ?? 80;
-    final testVal = (json['testability'] as num?)?.toInt() ?? dyn['testability'] ?? 80;
+    final testVal = (json['testability'] as num?)?.toInt() ?? dyn['testable'] ?? dyn['testability'] ?? 80;
     final consVal = (json['consistency'] as num?)?.toInt() ?? dyn['clarity_consistency'] ?? dyn['consistency'] ?? 80;
     final feasVal = (json['feasibility'] as num?)?.toInt() ?? dyn['feasibility_security'] ?? dyn['feasibility'] ?? 80;
     final ambVal = (json['ambiguity'] as num?)?.toInt() ?? dyn['ambiguity'] ?? 85;

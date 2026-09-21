@@ -4,6 +4,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/models.dart';
+import '../providers/ai_providers.dart';
+import '../providers/document_provider.dart';
 import '../providers/rubric_provider.dart';
 
 class RubricSelectorDialog extends ConsumerStatefulWidget {
@@ -468,6 +470,13 @@ class _RubricSelectorDialogState extends ConsumerState<RubricSelectorDialog> {
               );
               ref.read(rubricProvider.notifier).updateRubric(updatedRubric);
               ref.read(rubricProvider.notifier).selectRubric(updatedRubric);
+
+              // Auto re-analyze currently selected requirement under new rubric if already reviewed
+              final docState = ref.read(documentProvider);
+              final selectedReq = docState.selectedRequirement;
+              if (selectedReq != null && selectedReq.review != null) {
+                ref.read(aiReviewProvider.notifier).analyzeRequirement(selectedReq);
+              }
 
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(

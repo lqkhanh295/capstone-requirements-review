@@ -404,7 +404,7 @@ class AIReviewPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 1. Overall Score Section
-          _buildOverallScoreSection(review),
+          _buildOverallScoreSection(context, ref, review),
 
           const Divider(height: 1, color: AppTheme.border),
 
@@ -431,19 +431,44 @@ class AIReviewPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildOverallScoreSection(RequirementReview review) {
+  Widget _buildOverallScoreSection(
+    BuildContext context,
+    WidgetRef ref,
+    RequirementReview review,
+  ) {
+    final activeRubric = ref.watch(rubricProvider).activeRubric;
+    int overallScore = review.overallScore;
+    if (activeRubric.criteria.isNotEmpty) {
+      double sum = 0;
+      double totalWeight = 0;
+      for (final c in activeRubric.criteria) {
+        final s = review.scores.getScore(c.id);
+        sum += s * c.weight;
+        totalWeight += c.weight;
+      }
+      if (totalWeight > 0) {
+        overallScore = (sum / totalWeight).round().clamp(10, 100);
+      }
+    }
+
     Color scoreColor;
     String scoreGrade;
-    if (review.overallScore >= 80) {
+    if (overallScore >= 80) {
       scoreColor = AppTheme.statusPassed;
       scoreGrade = 'PASS';
-    } else if (review.overallScore >= 50) {
+    } else if (overallScore >= 50) {
       scoreColor = AppTheme.statusNeedsReview;
       scoreGrade = 'WARN';
     } else {
       scoreColor = AppTheme.statusFailed;
       scoreGrade = 'FAIL';
     }
+
+    final rubricNameShort = activeRubric.name.contains('FPT')
+        ? 'FPT-CAPSTONE'
+        : activeRubric.name.contains('INVEST')
+            ? 'AGILE-INVEST'
+            : 'IEEE-830';
 
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
@@ -455,14 +480,29 @@ class AIReviewPanel extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'AUDIT SCORE',
-                style: AppTheme.mono(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textMuted,
-                  letterSpacing: 0.8,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'AUDIT SCORE',
+                    style: AppTheme.mono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '· $rubricNameShort',
+                    style: AppTheme.mono(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
               Row(
@@ -470,7 +510,7 @@ class AIReviewPanel extends ConsumerWidget {
                 textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
-                    '${review.overallScore}',
+                    '$overallScore',
                     style: AppTheme.mono(
                       fontSize: 32,
                       fontWeight: FontWeight.w700,

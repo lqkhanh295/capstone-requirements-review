@@ -138,8 +138,157 @@ class MockAIService implements AIService {
       ));
     }
 
-    // Calculate Overall Score (Weighted Average)
+    // -----------------------------------------------------------------------
+    // FPT Capstone Rubric Heuristics
+    // -----------------------------------------------------------------------
+    final hasExplicitActor = RegExp(
+      r'\b(sinh viên|giảng viên|quản trị viên|người dùng|khách hàng|tác nhân|chuyên viên|admin|user|student|lecturer|staff|manager|customer|system|application|server)\b',
+      caseSensitive: false,
+    ).hasMatch(text);
+    int actorScore = 92;
+    if (!hasExplicitActor) {
+      actorScore = 55;
+    } else if (lower.contains('tất cả') || lower.contains('toàn bộ') || lower.contains('mọi chức năng')) {
+      actorScore = 68;
+    }
+
+    final hasCrudAction = RegExp(
+      r'\b(create|add|update|edit|delete|remove|search|filter|view|display|export|import|thêm|tạo|sửa|cập nhật|xóa|xem|hiển thị|tìm kiếm|lọc|xuất|nhập)\b',
+      caseSensitive: false,
+    ).hasMatch(text);
+    final hasValidationOrFlow = RegExp(
+      r'\b(lỗi|thất bại|không hợp lệ|xác thực|kiểm tra|thông báo|điều kiện|error|invalid|fail|validation|verify|validate|condition)\b',
+      caseSensitive: false,
+    ).hasMatch(text);
+
+    int crudScore = 90;
+    if (requirement.description.trim().length < 30) {
+      crudScore = 48;
+    } else if (!hasCrudAction) {
+      crudScore = 62;
+    } else if (!hasValidationOrFlow) {
+      crudScore = 68;
+    }
+
+    int clarityConsistencyScore = max(
+      35,
+      ((clarityScore * 0.5 + consistencyScore * 0.5) - (foundAmbiguous.length * 10)).round(),
+    );
+
+    // -----------------------------------------------------------------------
+    // Agile INVEST Rubric Heuristics
+    // -----------------------------------------------------------------------
+    final hasDependency = RegExp(
+      r'\b(phụ thuộc|sau khi|tiếp nối|kèm theo|cần có|yêu cầu trước|depends on|after|requires|coupled)\b',
+      caseSensitive: false,
+    ).hasMatch(text);
+    int independentScore = hasDependency ? 60 : 94;
+
+    final hasValueClause = RegExp(
+      r'\b(để|nhằm|giúp|cho phép|so that|in order to|as a|i want|với vai trò|nhờ đó)\b',
+      caseSensitive: false,
+    ).hasMatch(text);
+    int valuableScore = hasValueClause ? 95 : 65;
+
+    int estimableScore = (hasMetrics || (hasCriteria && requirement.description.length > 35)) ? 88 : 62;
+
+    final conjCount = RegExp(r'\b(và|đồng thời|cũng như|and|plus|as well as)\b', caseSensitive: false).allMatches(text).length;
+    int smallScore = (conjCount >= 3 || text.split(RegExp(r'\s+')).length > 55) ? 58 : 92;
+
+    final hasRigidTech = RegExp(
+      r'\b(pixel|px|#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})|rgb|thẻ html|table column|sql query|select \*|axios|stored procedure)\b',
+      caseSensitive: false,
+    ).hasMatch(text);
+    int negotiableScore = hasRigidTech ? 62 : 90;
+
+    // Specialize issues if a dedicated rubric is active
+    final rubricIssues = <ReviewIssue>[];
+    if (rubric?.id == 'fpt_capstone_srs') {
+      if (actorScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Actor & Scope',
+          severity: IssueSeverity.medium,
+          description: 'Chưa xác định rõ Actor/Role chịu trách nhiệm thực hiện hành động này trong hệ thống.',
+        ));
+      }
+      if (crudScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'CRUD & Business Flow',
+          severity: IssueSeverity.high,
+          description: 'Mô tả nghiệp vụ chưa đầy đủ điều kiện tiên quyết, luồng ngoại lệ hoặc xử lý lỗi khi nhập liệu.',
+        ));
+      }
+      if (testabilityScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Testability',
+          severity: IssueSeverity.high,
+          description: 'Thiếu tiêu chí nghiệm thu định lượng cụ thể để thiết kế kịch bản kiểm thử (Test Case).',
+        ));
+      }
+      if (clarityConsistencyScore < 80 && foundAmbiguous.isNotEmpty) {
+        rubricIssues.add(ReviewIssue(
+          type: 'Clarity & Consistency',
+          severity: IssueSeverity.medium,
+          description: 'Chứa từ ngữ định tính, mơ hồ: "${foundAmbiguous.join('", "')}".',
+        ));
+      }
+      if (feasibilityScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Feasibility',
+          severity: IssueSeverity.high,
+          description: 'Yêu cầu vượt quá giới hạn kỹ thuật hoặc khó hoàn thành trong một học kỳ đồ án.',
+        ));
+      }
+    } else if (rubric?.id == 'agile_invest_standard') {
+      if (independentScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Independent',
+          severity: IssueSeverity.medium,
+          description: 'Story bị phụ thuộc vào chức năng khác. Nên tách độc lập để có thể release riêng.',
+        ));
+      }
+      if (valuableScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Valuable',
+          severity: IssueSeverity.medium,
+          description: 'Chưa làm rõ giá trị nghiệp vụ cho người dùng cuối (thiếu mệnh đề "So that / Để có thể...").',
+        ));
+      }
+      if (estimableScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Estimable',
+          severity: IssueSeverity.medium,
+          description: 'Đặc tả còn thiếu độ chi tiết để team phát triển ước lượng Story Points chính xác.',
+        ));
+      }
+      if (smallScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Small',
+          severity: IssueSeverity.high,
+          description: 'Story có phạm vi quá lớn (Epic), chứa nhiều chức năng gộp chung cần phân rã cho 1 Sprint.',
+        ));
+      }
+      if (testabilityScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Testable',
+          severity: IssueSeverity.high,
+          description: 'Thiếu Acceptance Criteria định lượng hoặc kịch bản Given-When-Then để nghiệm thu.',
+        ));
+      }
+      if (negotiableScore < 80) {
+        rubricIssues.add(const ReviewIssue(
+          type: 'Negotiable',
+          severity: IssueSeverity.medium,
+          description: 'Story can thiệp quá sâu vào giải pháp kỹ thuật/giao diện, làm mất tính thương lượng giải pháp.',
+        ));
+      }
+    }
+
+    final finalIssues = rubricIssues.isNotEmpty ? rubricIssues : issues;
+
+    // Calculate Scores across all possible criteria
     final dynScores = <String, int>{
+      // IEEE-830
       'clarity': clarityScore,
       'completeness': completenessScore,
       'testability': testabilityScore,
@@ -147,15 +296,20 @@ class MockAIService implements AIService {
       'feasibility': feasibilityScore,
       'ambiguity': ambiguityScore,
       'duplication': duplicationScore,
-      'actor_scope': completenessScore,
-      'crud_completeness': completenessScore,
-      'clarity_consistency': (clarityScore + consistencyScore) ~/ 2,
+
+      // FPT Capstone
+      'actor_scope': actorScore,
+      'crud_completeness': crudScore,
+      'clarity_consistency': clarityConsistencyScore,
       'feasibility_security': feasibilityScore,
-      'independent': clarityScore,
-      'valuable': completenessScore,
-      'estimable': testabilityScore,
-      'small': clarityScore,
-      'negotiable': consistencyScore,
+
+      // Agile INVEST
+      'independent': independentScore,
+      'valuable': valuableScore,
+      'estimable': estimableScore,
+      'small': smallScore,
+      'testable': testabilityScore,
+      'negotiable': negotiableScore,
     };
 
     int overall;
@@ -163,7 +317,7 @@ class MockAIService implements AIService {
       double weightedSum = 0;
       double weightTotal = 0;
       for (final c in rubric.criteria) {
-        final s = dynScores[c.id] ?? 80;
+        final s = dynScores[c.id] ?? dynScores[c.id.toLowerCase()] ?? 80;
         weightedSum += s * c.weight;
         weightTotal += c.weight;
       }
@@ -199,7 +353,7 @@ class MockAIService implements AIService {
     return RequirementReview(
       overallScore: overall,
       scores: scores,
-      issues: issues,
+      issues: finalIssues,
       suggestedRevision: suggestedRevision,
     );
   }
