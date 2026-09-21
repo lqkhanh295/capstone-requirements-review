@@ -4,6 +4,7 @@ import '../../domain/models/models.dart';
 import '../../domain/services/ai_service.dart';
 import '../../infrastructure/ai/ai_service_factory.dart';
 import 'document_provider.dart';
+import 'rubric_provider.dart';
 
 // ----------------------------------------------------
 // AI Config Provider
@@ -121,6 +122,7 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
     final aiService = ref.read(aiServiceProvider);
     final docState = ref.read(documentProvider);
     final allReqs = docState.document?.requirements;
+    final activeRubric = ref.read(rubricProvider).activeRubric;
 
     state = state.copyWith(
       isAnalyzing: true,
@@ -132,6 +134,7 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
       final review = await aiService.reviewRequirement(
         requirement,
         allRequirements: allReqs,
+        rubric: activeRubric,
       );
 
       // Determine recommended review status based on overall score if not manually reviewed
@@ -173,6 +176,7 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
 
     final requirements = docState.document!.requirements;
     final aiService = ref.read(aiServiceProvider);
+    final activeRubric = ref.read(rubricProvider).activeRubric;
 
     _cancelRequested = false;
     state = state.copyWith(
@@ -195,6 +199,7 @@ class AIReviewNotifier extends Notifier<AIReviewState> {
         final review = await aiService.reviewRequirement(
           req,
           allRequirements: requirements,
+          rubric: activeRubric,
         );
 
         ReviewStatus updatedStatus = req.status;

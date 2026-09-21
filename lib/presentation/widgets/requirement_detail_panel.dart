@@ -10,7 +10,12 @@ import '../../infrastructure/parsers/requirement_extractor.dart';
 import '../providers/document_provider.dart';
 
 class RequirementDetailPanel extends ConsumerStatefulWidget {
-  const RequirementDetailPanel({super.key});
+  final VoidCallback? onJumpToDocument;
+
+  const RequirementDetailPanel({
+    super.key,
+    this.onJumpToDocument,
+  });
 
   @override
   ConsumerState<RequirementDetailPanel> createState() =>
@@ -152,45 +157,63 @@ class _RequirementDetailPanelState
   Widget _buildHeader(Requirement req) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 28,
-        vertical: 16,
+        horizontal: 20,
+        vertical: 14,
       ),
       color: AppTheme.surface,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Large Visual Identity: Requirement ID
-          Text(
-            req.id,
-            style: AppTheme.mono(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.primary,
-              letterSpacing: 0.6,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceSubtle,
-              border: Border.all(color: AppTheme.border),
-              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-            ),
-            child: Text(
-              req.type.label.toUpperCase(),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Large Visual Identity: Requirement ID
+            Text(
+              req.id,
               style: AppTheme.mono(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textSecondary,
-                letterSpacing: 0.5,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.primary,
+                letterSpacing: 0.6,
               ),
             ),
-          ),
-          const Spacer(),
-          // Status indicator
-          _buildStatusTag(req.status),
-        ],
+            const SizedBox(width: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceSubtle,
+                border: Border.all(color: AppTheme.border),
+                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+              ),
+              child: Text(
+                req.type.label.toUpperCase(),
+                style: AppTheme.mono(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textSecondary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            if (widget.onJumpToDocument != null) ...[
+              OutlinedButton.icon(
+                onPressed: widget.onJumpToDocument,
+                icon: const Icon(LucideIcons.locateFixed, size: 12),
+                label: Text(
+                  req.startLine != null ? 'Line ${req.startLine}' : 'Xem trong Document',
+                  style: AppTheme.mono(fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppTheme.border),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            // Status indicator
+            _buildStatusTag(req.status),
+          ],
+        ),
       ),
     );
   }
@@ -286,14 +309,38 @@ class _RequirementDetailPanelState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'SOURCE',
-          style: AppTheme.mono(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textSecondary,
-            letterSpacing: 1.0,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'SOURCE CONTEXT',
+              style: AppTheme.mono(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+                letterSpacing: 1.0,
+              ),
+            ),
+            if (widget.onJumpToDocument != null && req.startLine != null)
+              InkWell(
+                onTap: widget.onJumpToDocument,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.locateFixed, size: 12, color: AppTheme.primary),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Nhảy tới Line ${req.startLine} trong Document ->',
+                      style: AppTheme.mono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 6),
         Text(

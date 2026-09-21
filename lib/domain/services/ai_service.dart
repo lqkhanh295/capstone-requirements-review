@@ -100,11 +100,12 @@ class AIServiceConfig {
 abstract class AIService {
   AIProviderType get providerType;
 
-  /// Review a single requirement against quality criteria.
+  /// Review a single requirement against quality criteria according to active rubric.
   /// [allRequirements] is optional, used for duplication & consistency cross-checking.
   Future<RequirementReview> reviewRequirement(
     Requirement requirement, {
     List<Requirement>? allRequirements,
+    Rubric? rubric,
   });
 
   /// Batch review all requirements with progress notification.
@@ -112,6 +113,7 @@ abstract class AIService {
     List<Requirement> requirements, {
     void Function(int completed, int total)? onProgress,
     bool Function()? shouldCancel,
+    Rubric? rubric,
   });
 
   /// Verify API key and network connectivity.

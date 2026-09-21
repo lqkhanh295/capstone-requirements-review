@@ -17,6 +17,7 @@ class MockAIService implements AIService {
   Future<RequirementReview> reviewRequirement(
     Requirement requirement, {
     List<Requirement>? allRequirements,
+    Rubric? rubric,
   }) async {
     // Simulate slight processing delay for realistic UX
     await Future.delayed(const Duration(milliseconds: 350));
@@ -138,14 +139,47 @@ class MockAIService implements AIService {
     }
 
     // Calculate Overall Score (Weighted Average)
-    final overall = (
-      (clarityScore * 0.20) +
-      (completenessScore * 0.20) +
-      (testabilityScore * 0.20) +
-      (consistencyScore * 0.15) +
-      (feasibilityScore * 0.10) +
-      (ambiguityScore * 0.15)
-    ).round().clamp(10, 100);
+    final dynScores = <String, int>{
+      'clarity': clarityScore,
+      'completeness': completenessScore,
+      'testability': testabilityScore,
+      'consistency': consistencyScore,
+      'feasibility': feasibilityScore,
+      'ambiguity': ambiguityScore,
+      'duplication': duplicationScore,
+      'actor_scope': completenessScore,
+      'crud_completeness': completenessScore,
+      'clarity_consistency': (clarityScore + consistencyScore) ~/ 2,
+      'feasibility_security': feasibilityScore,
+      'independent': clarityScore,
+      'valuable': completenessScore,
+      'estimable': testabilityScore,
+      'small': clarityScore,
+      'negotiable': consistencyScore,
+    };
+
+    int overall;
+    if (rubric != null && rubric.criteria.isNotEmpty) {
+      double weightedSum = 0;
+      double weightTotal = 0;
+      for (final c in rubric.criteria) {
+        final s = dynScores[c.id] ?? 80;
+        weightedSum += s * c.weight;
+        weightTotal += c.weight;
+      }
+      overall = weightTotal > 0
+          ? (weightedSum / weightTotal).round().clamp(10, 100)
+          : ((clarityScore + completenessScore + testabilityScore) / 3).round();
+    } else {
+      overall = (
+        (clarityScore * 0.20) +
+        (completenessScore * 0.20) +
+        (testabilityScore * 0.20) +
+        (consistencyScore * 0.15) +
+        (feasibilityScore * 0.10) +
+        (ambiguityScore * 0.15)
+      ).round().clamp(10, 100);
+    }
 
     // Construct QualityScores
     final scores = QualityScores(
@@ -156,6 +190,7 @@ class MockAIService implements AIService {
       feasibility: feasibilityScore,
       ambiguity: ambiguityScore,
       duplication: duplicationScore,
+      dynamicScores: dynScores,
     );
 
     // Generate Suggested Revision
@@ -174,6 +209,7 @@ class MockAIService implements AIService {
     List<Requirement> requirements, {
     void Function(int completed, int total)? onProgress,
     bool Function()? shouldCancel,
+    Rubric? rubric,
   }) async {
     final results = <RequirementReview>[];
     for (int i = 0; i < requirements.length; i++) {
@@ -183,6 +219,7 @@ class MockAIService implements AIService {
       final review = await reviewRequirement(
         requirements[i],
         allRequirements: requirements,
+        rubric: rubric,
       );
       results.add(review);
       onProgress?.call(i + 1, requirements.length);

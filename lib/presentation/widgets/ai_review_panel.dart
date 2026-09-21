@@ -9,7 +9,9 @@ import '../../domain/services/ai_service.dart';
 import '../providers/ai_providers.dart';
 import '../providers/document_provider.dart';
 import '../providers/document_state.dart';
+import '../providers/rubric_provider.dart';
 import 'ai_settings_dialog.dart';
+import 'rubric_selector_dialog.dart';
 
 class AIReviewPanel extends ConsumerWidget {
   final Requirement? requirement;
@@ -64,6 +66,16 @@ class AIReviewPanel extends ConsumerWidget {
     WidgetRef ref,
     AIServiceConfig aiConfig,
   ) {
+    final activeRubric = ref.watch(rubricProvider).activeRubric;
+    String rubricShortLabel = 'RUBRIC: IEEE';
+    if (activeRubric.name.contains('FPT')) {
+      rubricShortLabel = 'RUBRIC: FPT';
+    } else if (activeRubric.name.contains('INVEST')) {
+      rubricShortLabel = 'RUBRIC: INVEST';
+    } else if (activeRubric.isCustom) {
+      rubricShortLabel = 'RUBRIC: CUSTOM';
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppTheme.space16,
@@ -75,19 +87,52 @@ class AIReviewPanel extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Text(
-            'AUTOMATED REVIEW',
-            style: AppTheme.mono(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-              color: AppTheme.textPrimary,
+          Expanded(
+            child: Text(
+              'AUTOMATED REVIEW',
+              overflow: TextOverflow.ellipsis,
+              style: AppTheme.mono(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+                color: AppTheme.textPrimary,
+              ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 6),
+          // Rubric selector button
+          InkWell(
+            onTap: () => RubricSelectorDialog.show(context),
+            borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(LucideIcons.scale, size: 10, color: AppTheme.primary),
+                  const SizedBox(width: 3),
+                  Text(
+                    rubricShortLabel.replaceFirst('RUBRIC: ', ''),
+                    style: AppTheme.mono(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primary,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
           // Provider Tag
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             decoration: BoxDecoration(
               color: AppTheme.surfaceSubtle,
               borderRadius: BorderRadius.circular(AppTheme.radiusPill),
@@ -96,26 +141,26 @@ class AIReviewPanel extends ConsumerWidget {
             child: Text(
               aiConfig.provider.name.toUpperCase(),
               style: AppTheme.mono(
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textSecondary,
                 letterSpacing: 0.4,
               ),
             ),
           ),
-          const SizedBox(width: AppTheme.space8),
+          const SizedBox(width: 4),
           // Settings button
           IconButton(
             tooltip: 'Cài đặt AI Provider',
             icon: const Icon(
               LucideIcons.settings,
-              size: 15,
+              size: 14,
               color: AppTheme.textSecondary,
             ),
             onPressed: () => AISettingsDialog.show(context),
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-            splashRadius: 16,
+            constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+            splashRadius: 12,
           ),
         ],
       ),
@@ -362,8 +407,8 @@ class AIReviewPanel extends ConsumerWidget {
 
           const Divider(height: 1, color: AppTheme.border),
 
-          // 2. Technical Audit Grid (7 Quality Dimensions)
-          _buildQualityDimensionsSection(review.scores),
+          // 2. Technical Audit Grid (Dynamic Rubric Dimensions)
+          _buildQualityDimensionsSection(context, ref, review.scores),
 
           const Divider(height: 1, color: AppTheme.border),
 
@@ -492,16 +537,15 @@ class AIReviewPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildQualityDimensionsSection(QualityScores scores) {
-    final dimensions = [
-      ('CLARITY', scores.clarity),
-      ('COMPLETENESS', scores.completeness),
-      ('TESTABILITY', scores.testability),
-      ('CONSISTENCY', scores.consistency),
-      ('FEASIBILITY', scores.feasibility),
-      ('AMBIGUITY', scores.ambiguity),
-      ('DUPLICATION', scores.duplication),
-    ];
+  Widget _buildQualityDimensionsSection(
+    BuildContext context,
+    WidgetRef ref,
+    QualityScores scores,
+  ) {
+    final activeRubric = ref.watch(rubricProvider).activeRubric;
+    final dimensions = activeRubric.criteria.map((c) {
+      return (c.name.toUpperCase(), scores.getScore(c.id));
+    }).toList();
 
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
@@ -521,12 +565,27 @@ class AIReviewPanel extends ConsumerWidget {
                   color: AppTheme.textPrimary,
                 ),
               ),
-              Text(
-                'IEEE-830',
-                style: AppTheme.mono(
-                  fontSize: 10,
-                  color: AppTheme.textMuted,
-                  letterSpacing: 0.5,
+              InkWell(
+                onTap: () => RubricSelectorDialog.show(context),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      activeRubric.name.contains('FPT')
+                          ? 'FPT-CAPSTONE'
+                          : activeRubric.name.contains('INVEST')
+                              ? 'AGILE-INVEST'
+                              : 'IEEE-830',
+                      style: AppTheme.mono(
+                        fontSize: 10,
+                        color: AppTheme.primary,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 3),
+                    const Icon(LucideIcons.chevronRight, size: 10, color: AppTheme.primary),
+                  ],
                 ),
               ),
             ],

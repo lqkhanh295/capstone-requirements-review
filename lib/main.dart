@@ -15,10 +15,13 @@ import 'presentation/export/export_report_dialog.dart';
 import 'presentation/providers/ai_providers.dart';
 import 'presentation/providers/document_provider.dart';
 import 'presentation/providers/document_state.dart';
+import 'presentation/providers/rubric_provider.dart';
 import 'presentation/widgets/ai_review_panel.dart';
 import 'presentation/widgets/ai_settings_dialog.dart';
+import 'presentation/widgets/document_viewer_panel.dart';
 import 'presentation/widgets/file_drop_zone.dart';
 import 'presentation/widgets/requirement_detail_panel.dart';
+import 'presentation/widgets/rubric_selector_dialog.dart';
 import 'presentation/widgets/left_sidebar/requirements_list_panel.dart';
 
 void main() {
@@ -54,6 +57,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedTabIndex = 0; // 0 = Workspace, 1 = Dashboard
+  int _centerViewMode = 0; // 0 = Detail, 1 = Document View, 2 = Split View
   bool _isGlobalDragging = false;
 
   Future<void> _pickNewDocument() async {
@@ -493,9 +497,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             children: [
               // Left Column: Requirements List
               const RequirementsListPanel(),
-              // Middle Column: Requirement Detail & Manual Review
-              const Expanded(
-                child: RequirementDetailPanel(),
+              // Middle Column: Requirement Detail, Document View, or Split View
+              Expanded(
+                child: _buildCenterContent(),
               ),
               // Right Column: AI Review Panel
               AIReviewPanel(
@@ -508,7 +512,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  Widget _buildCenterContent() {
+    switch (_centerViewMode) {
+      case 1:
+        return DocumentViewerPanel(
+          onSwitchToDetail: () => setState(() => _centerViewMode = 0),
+        );
+      case 2:
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 5,
+              child: RequirementDetailPanel(
+                onJumpToDocument: () => setState(() => _centerViewMode = 1),
+              ),
+            ),
+            const VerticalDivider(width: 1, color: AppTheme.border),
+            const Expanded(
+              flex: 5,
+              child: DocumentViewerPanel(),
+            ),
+          ],
+        );
+      case 0:
+      default:
+        return RequirementDetailPanel(
+          onJumpToDocument: () => setState(() => _centerViewMode = 1),
+        );
+    }
+  }
+
   Widget _buildDocumentHeader(Document doc) {
+    final activeRubric = ref.watch(rubricProvider).activeRubric;
+    String rubricShortLabel = 'RUBRIC: IEEE';
+    if (activeRubric.name.contains('FPT')) {
+      rubricShortLabel = 'RUBRIC: FPT CAPSTONE';
+    } else if (activeRubric.name.contains('INVEST')) {
+      rubricShortLabel = 'RUBRIC: INVEST';
+    } else if (activeRubric.isCustom) {
+      rubricShortLabel = 'RUBRIC: CUSTOM';
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppTheme.space16,
@@ -520,62 +565,151 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           bottom: BorderSide(color: AppTheme.border),
         ),
       ),
-      child: Row(
-        children: [
-          Text(
-            'SPEC:',
-            style: AppTheme.mono(
-              color: AppTheme.textMuted,
-              fontWeight: FontWeight.w700,
-              fontSize: 10,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(width: AppTheme.space8),
-          Text(
-            doc.name,
-            style: AppTheme.sans(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(width: AppTheme.space8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceSubtle,
-              borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Text(
-              doc.fileType.toUpperCase(),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            Text(
+              'SPEC:',
               style: AppTheme.mono(
-                color: AppTheme.textSecondary,
-                fontWeight: FontWeight.w600,
+                color: AppTheme.textMuted,
+                fontWeight: FontWeight.w700,
                 fontSize: 10,
+                letterSpacing: 0.5,
               ),
             ),
-          ),
-          const Spacer(),
-          Text(
-            '${(doc.fileSize / 1024).toStringAsFixed(1)} KB',
-            style: AppTheme.mono(
-              fontSize: 11,
-              color: AppTheme.textSecondary,
+            const SizedBox(width: AppTheme.space8),
+            Text(
+              doc.name,
+              style: AppTheme.sans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(width: AppTheme.space16),
-          Text(
-            '${doc.requirements.length} REQUIREMENTS',
-            style: AppTheme.mono(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+            const SizedBox(width: AppTheme.space8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceSubtle,
+                borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Text(
+                doc.fileType.toUpperCase(),
+                style: AppTheme.mono(
+                  color: AppTheme.textSecondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: AppTheme.space16),
+
+            // Center View Mode Toggle
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceSubtle,
+                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildModeButton(0, LucideIcons.clipboardList, 'Đánh giá'),
+                  _buildModeButton(1, LucideIcons.fileText, 'Văn bản gốc (Line View)'),
+                  _buildModeButton(2, LucideIcons.columns2, 'Song song (Split)'),
+                ],
+              ),
+            ),
+
+            const SizedBox(width: AppTheme.space24),
+
+            // Rubric Selector Button in Document Header
+            InkWell(
+              onTap: () => RubricSelectorDialog.show(context),
+              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.scale, size: 12, color: AppTheme.primary),
+                    const SizedBox(width: 5),
+                    Text(
+                      rubricShortLabel,
+                      style: AppTheme.mono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primary,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(width: AppTheme.space16),
+            Text(
+              '${(doc.fileSize / 1024).toStringAsFixed(1)} KB',
+              style: AppTheme.mono(
+                fontSize: 11,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(width: AppTheme.space16),
+            Text(
+              '${doc.requirements.length} REQUIREMENTS',
+              style: AppTheme.mono(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeButton(int mode, IconData icon, String label) {
+    final isSelected = _centerViewMode == mode;
+    return InkWell(
+      onTap: () => setState(() => _centerViewMode = mode),
+      borderRadius: BorderRadius.circular(AppTheme.radiusButton - 1),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.textPrimary : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton - 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 11,
+              color: isSelected ? AppTheme.surface : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: AppTheme.mono(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppTheme.surface : AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

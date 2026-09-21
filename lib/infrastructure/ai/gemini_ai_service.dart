@@ -62,6 +62,7 @@ class GeminiAIService implements AIService {
   Future<RequirementReview> reviewRequirement(
     Requirement requirement, {
     List<Requirement>? allRequirements,
+    Rubric? rubric,
   }) async {
     if (config.apiKey.trim().isEmpty) {
       throw ValidationException('Vui lòng nhập Gemini API Key trong phần Cài đặt AI.');
@@ -72,7 +73,9 @@ class GeminiAIService implements AIService {
       'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=${config.apiKey}',
     );
 
-    final promptText = '${AIPromptHelper.systemInstruction}\n\n${AIPromptHelper.buildUserPrompt(requirement, allRequirements: allRequirements)}';
+    final sysPrompt = AIPromptHelper.buildSystemInstruction(rubric);
+    final userPrompt = AIPromptHelper.buildUserPrompt(requirement, allRequirements: allRequirements, rubric: rubric);
+    final promptText = '$sysPrompt\n\n$userPrompt';
 
     int attempts = 0;
     while (attempts <= config.maxRetries) {
@@ -102,7 +105,7 @@ class GeminiAIService implements AIService {
           if (candidates != null && candidates.isNotEmpty) {
             final text = candidates[0]['content']?['parts']?[0]?['text'] as String?;
             if (text != null && text.isNotEmpty) {
-              return AIPromptHelper.parseAIResponse(text);
+              return AIPromptHelper.parseAIResponse(text, rubric);
             }
           }
           throw DocumentParseException('Phản hồi từ Gemini không có nội dung.');
@@ -140,6 +143,7 @@ class GeminiAIService implements AIService {
     List<Requirement> requirements, {
     void Function(int completed, int total)? onProgress,
     bool Function()? shouldCancel,
+    Rubric? rubric,
   }) async {
     final results = <RequirementReview>[];
     for (int i = 0; i < requirements.length; i++) {
@@ -149,6 +153,7 @@ class GeminiAIService implements AIService {
       final review = await reviewRequirement(
         requirements[i],
         allRequirements: requirements,
+        rubric: rubric,
       );
       results.add(review);
       onProgress?.call(i + 1, requirements.length);

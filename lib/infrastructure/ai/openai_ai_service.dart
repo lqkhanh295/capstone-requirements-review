@@ -63,13 +63,15 @@ class OpenAIAIService implements AIService {
   Future<RequirementReview> reviewRequirement(
     Requirement requirement, {
     List<Requirement>? allRequirements,
+    Rubric? rubric,
   }) async {
     if (config.apiKey.trim().isEmpty) {
       throw ValidationException('Vui lòng nhập OpenAI API Key trong phần Cài đặt AI.');
     }
 
     final url = Uri.parse('$_baseUrl/chat/completions');
-    final userPrompt = AIPromptHelper.buildUserPrompt(requirement, allRequirements: allRequirements);
+    final userPrompt = AIPromptHelper.buildUserPrompt(requirement, allRequirements: allRequirements, rubric: rubric);
+    final sysPrompt = AIPromptHelper.buildSystemInstruction(rubric);
 
     int attempts = 0;
     while (attempts <= config.maxRetries) {
@@ -88,7 +90,7 @@ class OpenAIAIService implements AIService {
             'messages': [
               {
                 'role': 'system',
-                'content': AIPromptHelper.systemInstruction,
+                'content': sysPrompt,
               },
               {
                 'role': 'user',
@@ -104,7 +106,7 @@ class OpenAIAIService implements AIService {
           if (choices != null && choices.isNotEmpty) {
             final content = choices[0]['message']?['content'] as String?;
             if (content != null && content.isNotEmpty) {
-              return AIPromptHelper.parseAIResponse(content);
+              return AIPromptHelper.parseAIResponse(content, rubric);
             }
           }
           throw DocumentParseException('Phản hồi từ OpenAI không có nội dung.');
@@ -141,6 +143,7 @@ class OpenAIAIService implements AIService {
     List<Requirement> requirements, {
     void Function(int completed, int total)? onProgress,
     bool Function()? shouldCancel,
+    Rubric? rubric,
   }) async {
     final results = <RequirementReview>[];
     for (int i = 0; i < requirements.length; i++) {
@@ -150,6 +153,7 @@ class OpenAIAIService implements AIService {
       final review = await reviewRequirement(
         requirements[i],
         allRequirements: requirements,
+        rubric: rubric,
       );
       results.add(review);
       onProgress?.call(i + 1, requirements.length);

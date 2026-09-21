@@ -49,9 +49,11 @@ class OllamaAIService implements AIService {
   Future<RequirementReview> reviewRequirement(
     Requirement requirement, {
     List<Requirement>? allRequirements,
+    Rubric? rubric,
   }) async {
     final chatUrl = Uri.parse('$_baseUrl/api/chat');
-    final userPrompt = AIPromptHelper.buildUserPrompt(requirement, allRequirements: allRequirements);
+    final userPrompt = AIPromptHelper.buildUserPrompt(requirement, allRequirements: allRequirements, rubric: rubric);
+    final sysPrompt = AIPromptHelper.buildSystemInstruction(rubric);
 
     int attempts = 0;
     while (attempts <= config.maxRetries) {
@@ -69,7 +71,7 @@ class OllamaAIService implements AIService {
             'messages': [
               {
                 'role': 'system',
-                'content': AIPromptHelper.systemInstruction,
+                'content': sysPrompt,
               },
               {
                 'role': 'user',
@@ -89,7 +91,7 @@ class OllamaAIService implements AIService {
             throw ValidationException('Ollama trả về phản hồi rỗng.');
           }
 
-          return AIPromptHelper.parseAIResponse(content);
+          return AIPromptHelper.parseAIResponse(content, rubric);
         } else {
           final errorMsg = response.body;
           if (attempts > config.maxRetries) {
@@ -115,6 +117,7 @@ class OllamaAIService implements AIService {
     List<Requirement> requirements, {
     void Function(int completed, int total)? onProgress,
     bool Function()? shouldCancel,
+    Rubric? rubric,
   }) async {
     final results = <RequirementReview>[];
     for (int i = 0; i < requirements.length; i++) {
@@ -124,6 +127,7 @@ class OllamaAIService implements AIService {
       final review = await reviewRequirement(
         requirements[i],
         allRequirements: requirements,
+        rubric: rubric,
       );
       results.add(review);
       onProgress?.call(i + 1, requirements.length);
