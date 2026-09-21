@@ -8,6 +8,8 @@ class Requirement {
   final String description;
   final RequirementType type;
   final String sourceLocation;
+  final int? startLine;
+  final int? endLine;
   final ReviewStatus status;
   final RequirementReview? review;
   final List<ReviewComment> comments;
@@ -18,6 +20,8 @@ class Requirement {
     required this.description,
     this.type = RequirementType.functional,
     this.sourceLocation = '',
+    this.startLine,
+    this.endLine,
     this.status = ReviewStatus.notReviewed,
     this.review,
     this.comments = const [],
@@ -29,6 +33,8 @@ class Requirement {
     String? description,
     RequirementType? type,
     String? sourceLocation,
+    int? startLine,
+    int? endLine,
     ReviewStatus? status,
     RequirementReview? review,
     List<ReviewComment>? comments,
@@ -39,6 +45,8 @@ class Requirement {
       description: description ?? this.description,
       type: type ?? this.type,
       sourceLocation: sourceLocation ?? this.sourceLocation,
+      startLine: startLine ?? this.startLine,
+      endLine: endLine ?? this.endLine,
       status: status ?? this.status,
       review: review ?? this.review,
       comments: comments ?? this.comments,
@@ -52,6 +60,8 @@ class Requirement {
       description: json['description'] as String? ?? '',
       type: RequirementType.fromString(json['type'] as String?),
       sourceLocation: json['sourceLocation'] as String? ?? '',
+      startLine: (json['startLine'] as num?)?.toInt(),
+      endLine: (json['endLine'] as num?)?.toInt(),
       status: ReviewStatus.fromString(json['status'] as String?),
       review: json['review'] != null
           ? RequirementReview.fromJson(json['review'] as Map<String, dynamic>)
@@ -69,6 +79,8 @@ class Requirement {
     'description': description,
     'type': type.name,
     'sourceLocation': sourceLocation,
+    if (startLine != null) 'startLine': startLine,
+    if (endLine != null) 'endLine': endLine,
     'status': status.name,
     if (review != null) 'review': review!.toJson(),
     'comments': comments.map((e) => e.toJson()).toList(),

@@ -99,6 +99,8 @@ class CompositeDocumentParser {
       fileSize: fileSize ?? bytes.length,
       importedAt: DateTime.now(),
       requirements: requirements,
+      rawContent: rawContent.fullText,
+      rawLines: lines,
     );
   }
 }

@@ -62,6 +62,7 @@ class RequirementExtractor {
     final List<String> currentDescLines = [];
     RequirementType currentType = section.inferredType;
     int reqStartLine = section.startLine;
+    int reqEndLine = section.startLine;
 
     void commitRequirement() {
       if (currentTitle != null || currentDescLines.isNotEmpty) {
@@ -103,6 +104,8 @@ class RequirementExtractor {
           description: desc,
           type: currentType,
           sourceLocation: sourceLoc,
+          startLine: reqStartLine,
+          endLine: reqEndLine,
           status: ReviewStatus.notReviewed,
         ));
       }
@@ -144,6 +147,7 @@ class RequirementExtractor {
       if (isLineStartId) {
         commitRequirement();
         reqStartLine = currentLineNumber;
+        reqEndLine = currentLineNumber;
 
         final prefix = idMatch.group(1)!.toUpperCase();
         final number = int.tryParse(idMatch.group(2)!) ?? 1;
@@ -169,6 +173,7 @@ class RequirementExtractor {
       if (isItemBullet && (containsRequirementKeyword || currentId != null)) {
         commitRequirement();
         reqStartLine = currentLineNumber;
+        reqEndLine = currentLineNumber;
 
         final cleanItem = line.replaceAll(RegExp(r'^(\*|-|\+|\d+[\.\)])\s+'), '').trim();
         final parts = cleanItem.split(RegExp(r'(?<=[.!?])\s+'));
@@ -184,6 +189,7 @@ class RequirementExtractor {
       // Otherwise, line is part of description of current requirement
       if (currentTitle != null || currentId != null) {
         currentDescLines.add(line);
+        reqEndLine = currentLineNumber;
       }
     }
 
@@ -270,6 +276,8 @@ class RequirementExtractor {
       description: description,
       type: reqType,
       sourceLocation: sourceLoc,
+      startLine: lineNumber,
+      endLine: lineNumber,
       status: ReviewStatus.notReviewed,
     );
   }
@@ -335,6 +343,8 @@ class RequirementExtractor {
           description: line,
           type: RequirementType.functional,
           sourceLocation: sourceName != null ? '$sourceName (Line ${i + 1})' : 'Line ${i + 1}',
+          startLine: i + 1,
+          endLine: i + 1,
           status: ReviewStatus.notReviewed,
         ));
       }

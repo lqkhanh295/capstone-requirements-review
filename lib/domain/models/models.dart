@@ -3,3 +3,4 @@ export 'comment.dart';
 export 'review.dart';
 export 'requirement.dart';
 export 'document.dart';
+export 'rubric.dart';

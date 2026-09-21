@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 
 class QualityScoreCard extends StatelessWidget {
@@ -14,16 +13,15 @@ class QualityScoreCard extends StatelessWidget {
 
   Color get scoreColor {
     if (overallScore >= 80) return AppTheme.statusPassed;
-    if (overallScore >= 60) return AppTheme.statusNeedsReview;
+    if (overallScore >= 50) return AppTheme.statusNeedsReview;
     return AppTheme.statusFailed;
   }
 
   String get scoreGrade {
-    if (overallScore >= 90) return 'Excellent Quality';
-    if (overallScore >= 80) return 'Good Quality';
-    if (overallScore >= 60) return 'Needs Revision';
-    if (overallScore > 0) return 'Poor Quality';
-    return 'Not Evaluated';
+    if (overallScore >= 80) return 'PASS';
+    if (overallScore >= 50) return 'WARN';
+    if (overallScore > 0) return 'FAIL';
+    return 'PENDING';
   }
 
   @override
@@ -42,38 +40,36 @@ class QualityScoreCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Text(
+                'OVERALL QUALITY SCORE',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(LucideIcons.award, color: AppTheme.primary, size: 16),
-                  SizedBox(width: AppTheme.space8),
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: scoreColor,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
                   Text(
-                    'Overall Quality Score',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                    scoreGrade,
+                    style: AppTheme.mono(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: scoreColor,
                     ),
                   ),
                 ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: scoreColor.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-                  border: Border.all(color: scoreColor.withValues(alpha: 0.25)),
-                ),
-                child: Text(
-                  scoreGrade,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: scoreColor,
-                  ),
-                ),
               ),
             ],
           ),
@@ -81,40 +77,38 @@ class QualityScoreCard extends StatelessWidget {
 
           // Main Score Content Area
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Clean Score Card Box
               Container(
-                width: 90,
-                height: 90,
+                width: 84,
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-                  color: scoreColor.withValues(alpha: 0.08),
-                  border: Border.all(color: scoreColor.withValues(alpha: 0.25)),
+                  color: AppTheme.surfaceSubtle,
+                  border: Border.all(color: AppTheme.border),
                 ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$overallScore',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w700,
-                          color: scoreColor,
-                          height: 1.0,
-                        ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '$overallScore',
+                      style: AppTheme.mono(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
+                        height: 1.0,
                       ),
-                      const SizedBox(height: 3),
-                      const Text(
-                        '/ 100',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textMuted,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '/ 100',
+                      style: AppTheme.mono(
+                        fontSize: 11,
+                        color: AppTheme.textMuted,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(width: AppTheme.space20),
@@ -135,17 +129,17 @@ class QualityScoreCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                metricName,
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                metricName.toUpperCase(),
+                                style: AppTheme.mono(
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w500,
                                   color: AppTheme.textSecondary,
                                 ),
                               ),
                               Text(
                                 '${scoreVal.toStringAsFixed(0)}%',
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                style: AppTheme.mono(
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   color: AppTheme.textPrimary,
                                 ),
@@ -153,20 +147,17 @@ class QualityScoreCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 3),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(2),
-                            child: LinearProgressIndicator(
-                              value: (scoreVal / 100).clamp(0.0, 1.0),
-                              backgroundColor: AppTheme.surfaceSubtle,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                scoreVal >= 80
-                                    ? AppTheme.statusPassed
-                                    : scoreVal >= 60
-                                        ? AppTheme.statusNeedsReview
-                                        : AppTheme.statusFailed,
-                              ),
-                              minHeight: 4,
+                          LinearProgressIndicator(
+                            value: (scoreVal / 100).clamp(0.0, 1.0),
+                            backgroundColor: AppTheme.borderLight,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              scoreVal >= 80
+                                  ? AppTheme.statusPassed
+                                  : scoreVal >= 50
+                                      ? AppTheme.statusNeedsReview
+                                      : AppTheme.statusFailed,
                             ),
+                            minHeight: 2,
                           ),
                         ],
                       ),

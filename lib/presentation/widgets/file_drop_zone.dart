@@ -89,13 +89,11 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: _isDragging
-              ? AppTheme.primarySoft
-              : AppTheme.surface,
+          color: _isDragging ? AppTheme.surfaceSubtle : AppTheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           border: Border.all(
             color: _isDragging ? AppTheme.primary : AppTheme.border,
-            width: _isDragging ? 1.5 : 1.0,
+            width: 1.0,
           ),
         ),
         child: InkWell(
@@ -110,37 +108,48 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  _isDragging ? LucideIcons.fileDown : LucideIcons.uploadCloud,
-                  size: 28,
-                  color: _isDragging ? AppTheme.primary : AppTheme.textMuted,
+                  LucideIcons.uploadCloud,
+                  size: 24,
+                  color: _isDragging ? AppTheme.primary : AppTheme.textSecondary,
                 ),
                 const SizedBox(height: AppTheme.space16),
                 Text(
                   _isDragging
-                      ? 'Thả tài liệu vào đây'
-                      : 'Kéo thả tài liệu vào đây hoặc nhấp để chọn tệp',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
+                      ? 'RELEASE TO IMPORT'
+                      : 'IMPORT SPECIFICATION DOCUMENT',
+                  style: AppTheme.mono(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: _isDragging ? AppTheme.primary : AppTheme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
-                  'Hỗ trợ định dạng: ${AppConstants.supportedExtensions.map((e) => e.toUpperCase()).join(', ')} • Tối đa ${AppConstants.maxFileSizeReadable}',
-                  style: const TextStyle(
+                  'Drop PDF, DOCX, TXT, or Markdown file here, or click to browse.',
+                  style: AppTheme.sans(
                     fontSize: 12,
                     color: AppTheme.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  'Formats: ${AppConstants.supportedExtensions.map((e) => e.toUpperCase()).join(', ')} • Max: ${AppConstants.maxFileSizeReadable}',
+                  style: AppTheme.mono(
+                    fontSize: 10,
+                    color: AppTheme.textMuted,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: AppTheme.space20),
-                ElevatedButton.icon(
+                ElevatedButton(
                   onPressed: isLoading ? null : _pickFile,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppTheme.textPrimary,
+                    foregroundColor: AppTheme.surface,
+                    elevation: 0,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 10,
@@ -148,12 +157,13 @@ class _FileDropZoneState extends ConsumerState<FileDropZone> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     ),
-                    elevation: 0,
                   ),
-                  icon: const Icon(LucideIcons.filePlus, size: 15),
-                  label: const Text(
-                    'Chọn tệp từ máy tính',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  child: Text(
+                    '[ Browse files ]',
+                    style: AppTheme.mono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

@@ -17,9 +17,9 @@ void main() {
       ),
     );
 
-    expect(find.text('Capstone Requirements Review'), findsWidgets);
-    expect(find.text('Nhập tài liệu yêu cầu (SRS)'), findsOneWidget);
-    expect(find.text('Chọn tệp từ máy tính'), findsOneWidget);
+    expect(find.text('CAPSTONE REVIEW'), findsWidgets);
+    expect(find.text('CAPSTONE REQUIREMENTS AUDITOR'), findsOneWidget);
+    expect(find.text('[ Browse files ]'), findsOneWidget);
   });
 
   testWidgets('AIReviewPanel renders correctly with AIProviderType without NoSuchMethodError', (WidgetTester tester) async {
@@ -50,7 +50,7 @@ void main() {
       );
 
       // Verify header and provider tag render properly
-      expect(find.text('AI Review & Analysis'), findsOneWidget);
+      expect(find.text('AUTOMATED REVIEW'), findsOneWidget);
       expect(find.text(provider.name.toUpperCase()), findsOneWidget);
       expect(tester.takeException(), isNull);
     }
@@ -95,7 +95,7 @@ void main() {
 
     // Verify 3 columns render cleanly
     expect(find.text('Open Document'), findsWidgets);
-    expect(find.text('AI Review & Analysis'), findsOneWidget);
+    expect(find.text('AUTOMATED REVIEW'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

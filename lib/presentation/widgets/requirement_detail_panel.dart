@@ -32,9 +32,13 @@ class _RequirementDetailPanelState
 
   void _saveReviewSession(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã lưu trạng thái phiên review hiện tại.'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(
+          'Đã lưu trạng thái phiên review hiện tại.',
+          style: AppTheme.sans(fontSize: 12),
+        ),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -64,14 +68,45 @@ class _RequirementDetailPanelState
               const Divider(height: 1),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppTheme.space24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 24,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Requirement Title
+                      Text(
+                        selectedReq.title.toUpperCase(),
+                        style: AppTheme.sans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                          letterSpacing: 0.3,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Description
                       _buildDescription(selectedReq),
-                      const SizedBox(height: AppTheme.space32),
+                      const SizedBox(height: 28),
+                      const Divider(height: 1),
+                      const SizedBox(height: 20),
+
+                      // Metadata Grid: SOURCE & STATUS
+                      _buildMetadataGrid(selectedReq),
+                      const SizedBox(height: 28),
+                      const Divider(height: 1),
+                      const SizedBox(height: 20),
+
+                      // Manual Review Status Selection
                       _buildManualReviewSection(selectedReq),
-                      const SizedBox(height: AppTheme.space32),
+                      const SizedBox(height: 28),
+                      const Divider(height: 1),
+                      const SizedBox(height: 20),
+
+                      // Comments / Notes
                       _buildCommentsSection(selectedReq),
                     ],
                   ),
@@ -87,28 +122,26 @@ class _RequirementDetailPanelState
   Widget _buildEmptyState() {
     return Container(
       color: AppTheme.surface,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              LucideIcons.fileSearch,
-              size: 28,
-              color: AppTheme.textMuted,
-            ),
-            SizedBox(height: AppTheme.space12),
             Text(
-              'Chưa chọn Requirement',
-              style: TextStyle(
-                fontSize: 14,
+              'NO REQUIREMENT SELECTED',
+              style: AppTheme.mono(
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textSecondary,
+                color: AppTheme.textMuted,
+                letterSpacing: 1.0,
               ),
             ),
-            SizedBox(height: AppTheme.space4),
+            const SizedBox(height: 6),
             Text(
-              'Chọn một yêu cầu từ danh sách bên trái để xem chi tiết và đánh giá.',
-              style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+              'Select a requirement from the list on the left to inspect details.',
+              style: AppTheme.sans(
+                fontSize: 12,
+                color: AppTheme.textSecondary,
+              ),
             ),
           ],
         ),
@@ -119,114 +152,97 @@ class _RequirementDetailPanelState
   Widget _buildHeader(Requirement req) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.space24,
-        vertical: AppTheme.space16,
+        horizontal: 28,
+        vertical: 16,
       ),
       color: AppTheme.surface,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceSubtle,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: AppTheme.border),
-                ),
-                child: Text(
-                  req.id,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
-                    color: AppTheme.textPrimary,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppTheme.space8),
-              _buildTypeBadge(req.type),
-              const Spacer(),
-              if (req.sourceLocation.isNotEmpty) ...[
-                const Icon(
-                  LucideIcons.fileText,
-                  size: 13,
-                  color: AppTheme.textMuted,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'Trang ${req.sourceLocation}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppTheme.textMuted,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: AppTheme.space12),
+          // Large Visual Identity: Requirement ID
           Text(
-            req.title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-              height: 1.35,
+            req.id,
+            style: AppTheme.mono(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.primary,
+              letterSpacing: 0.6,
             ),
           ),
+          const SizedBox(width: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceSubtle,
+              border: Border.all(color: AppTheme.border),
+              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+            ),
+            child: Text(
+              req.type.label.toUpperCase(),
+              style: AppTheme.mono(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          const Spacer(),
+          // Status indicator
+          _buildStatusTag(req.status),
         ],
       ),
     );
   }
 
-  Widget _buildTypeBadge(RequirementType type) {
-    Color bg;
-    Color fg;
-    Color border;
-    switch (type) {
-      case RequirementType.functional:
-        bg = AppTheme.primarySoft;
-        fg = AppTheme.primary;
-        border = AppTheme.primary.withValues(alpha: 0.2);
+  Widget _buildStatusTag(ReviewStatus status) {
+    Color statusColor;
+    String label;
+    switch (status) {
+      case ReviewStatus.passed:
+        statusColor = AppTheme.statusPassed;
+        label = 'PASSED';
         break;
-      case RequirementType.nonFunctional:
-        bg = AppTheme.statusNeedsReview.withValues(alpha: 0.1);
-        fg = AppTheme.statusNeedsReview;
-        border = AppTheme.statusNeedsReview.withValues(alpha: 0.25);
+      case ReviewStatus.needsReview:
+        statusColor = AppTheme.statusNeedsReview;
+        label = 'NEEDS REVIEW';
         break;
-      case RequirementType.security:
-        bg = AppTheme.statusFailed.withValues(alpha: 0.1);
-        fg = AppTheme.statusFailed;
-        border = AppTheme.statusFailed.withValues(alpha: 0.25);
+      case ReviewStatus.failed:
+        statusColor = AppTheme.statusFailed;
+        label = 'FAILED';
         break;
-      case RequirementType.performance:
-        bg = const Color(0xFF5B21B6).withValues(alpha: 0.08);
-        fg = const Color(0xFF5B21B6);
-        border = const Color(0xFF5B21B6).withValues(alpha: 0.2);
+      case ReviewStatus.notReviewed:
+        statusColor = AppTheme.textMuted;
+        label = 'OPEN';
         break;
-      default:
-        bg = AppTheme.surfaceSubtle;
-        fg = AppTheme.textSecondary;
-        border = AppTheme.border;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-        border: Border.all(color: border),
-      ),
-      child: Text(
-        type.label,
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: statusColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: AppTheme.mono(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: statusColor,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildDescription(Requirement req) {
-    // If description has fragmented newlines (e.g. from PDF text extraction), format smoothly into paragraphs
     final rawLines = req.description.split('\n');
     final displayText = (rawLines.length > 2)
         ? RequirementExtractor.formatDescription(rawLines)
@@ -235,31 +251,56 @@ class _RequirementDetailPanelState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'MÔ TẢ YÊU CẦU',
-          style: TextStyle(
-            fontSize: 11,
+        Text(
+          'SPECIFICATION',
+          style: AppTheme.mono(
+            fontSize: 10,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
-            letterSpacing: 0.8,
+            letterSpacing: 1.0,
           ),
         ),
-        const SizedBox(height: AppTheme.space8),
+        const SizedBox(height: 10),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppTheme.space16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceSubtle,
+            color: AppTheme.background,
+            border: Border.all(color: AppTheme.border, width: 1.0),
             borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-            border: Border.all(color: AppTheme.border),
           ),
           child: Text(
             displayText,
-            style: const TextStyle(
-              fontSize: 13,
+            style: AppTheme.sans(
+              fontSize: 14,
               color: AppTheme.textPrimary,
               height: 1.6,
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetadataGrid(Requirement req) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'SOURCE',
+          style: AppTheme.mono(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textSecondary,
+            letterSpacing: 1.0,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          req.sourceLocation.isNotEmpty ? req.sourceLocation : 'N/A',
+          style: AppTheme.mono(
+            fontSize: 12,
+            color: AppTheme.textPrimary,
           ),
         ),
       ],
@@ -270,19 +311,19 @@ class _RequirementDetailPanelState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'TRẠNG THÁI ĐÁNH GIÁ THỦ CÔNG',
-          style: TextStyle(
-            fontSize: 11,
+        Text(
+          'REVIEW STATUS',
+          style: AppTheme.mono(
+            fontSize: 10,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
-            letterSpacing: 0.8,
+            letterSpacing: 1.0,
           ),
         ),
-        const SizedBox(height: AppTheme.space8),
+        const SizedBox(height: 10),
         Wrap(
-          spacing: AppTheme.space8,
-          runSpacing: AppTheme.space8,
+          spacing: 8,
+          runSpacing: 8,
           children: ReviewStatus.values.map((status) {
             final isSelected = req.status == status;
             return _buildStatusButton(status, isSelected, req.id);
@@ -298,24 +339,24 @@ class _RequirementDetailPanelState
     String reqId,
   ) {
     Color activeColor;
-    IconData icon;
+    String label;
 
     switch (status) {
       case ReviewStatus.passed:
         activeColor = AppTheme.statusPassed;
-        icon = LucideIcons.checkCircle2;
+        label = 'PASSED';
         break;
       case ReviewStatus.needsReview:
         activeColor = AppTheme.statusNeedsReview;
-        icon = LucideIcons.alertCircle;
+        label = 'NEEDS ATTENTION';
         break;
       case ReviewStatus.failed:
         activeColor = AppTheme.statusFailed;
-        icon = LucideIcons.xCircle;
+        label = 'FAILED';
         break;
       case ReviewStatus.notReviewed:
-        activeColor = AppTheme.statusNotReviewed;
-        icon = LucideIcons.helpCircle;
+        activeColor = AppTheme.textSecondary;
+        label = 'OPEN';
         break;
     }
 
@@ -328,12 +369,12 @@ class _RequirementDetailPanelState
       borderRadius: BorderRadius.circular(AppTheme.radiusButton),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 9,
+          horizontal: 12,
+          vertical: 7,
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? activeColor.withValues(alpha: 0.08)
+              ? activeColor.withValues(alpha: 0.1)
               : AppTheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           border: Border.all(
@@ -344,18 +385,22 @@ class _RequirementDetailPanelState
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected ? activeColor : AppTheme.textSecondary,
+            Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(
+                color: isSelected ? activeColor : AppTheme.textMuted,
+                shape: BoxShape.circle,
+              ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 7),
             Text(
-              status.label,
-              style: TextStyle(
-                fontSize: 12,
+              label,
+              style: AppTheme.mono(
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? activeColor : AppTheme.textPrimary,
+                letterSpacing: 0.4,
               ),
             ),
           ],
@@ -368,23 +413,22 @@ class _RequirementDetailPanelState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'GHI CHÚ REVIEWER',
-          style: TextStyle(
-            fontSize: 11,
+        Text(
+          'REVIEWER NOTES',
+          style: AppTheme.mono(
+            fontSize: 10,
             fontWeight: FontWeight.w600,
             color: AppTheme.textSecondary,
-            letterSpacing: 0.8,
+            letterSpacing: 1.0,
           ),
         ),
-        const SizedBox(height: AppTheme.space8),
+        const SizedBox(height: 10),
         if (req.comments.isNotEmpty) ...[
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: req.comments.length,
-            separatorBuilder: (context, index) =>
-                const SizedBox(height: 8),
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final comment = req.comments[index];
               return _buildCommentItem(req.id, comment);
@@ -398,41 +442,32 @@ class _RequirementDetailPanelState
   }
 
   Widget _buildCommentItem(String reqId, ReviewComment comment) {
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.background,
         borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.border, width: 1.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 10,
-                backgroundColor: AppTheme.primarySoft,
-                child: const Icon(
-                  LucideIcons.user,
-                  size: 12,
-                  color: AppTheme.primary,
-                ),
-              ),
-              const SizedBox(width: AppTheme.space8),
               Text(
-                comment.author,
-                style: const TextStyle(
+                comment.author.toUpperCase(),
+                style: AppTheme.mono(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: 11,
                   color: AppTheme.textPrimary,
+                  letterSpacing: 0.4,
                 ),
               ),
-              const SizedBox(width: AppTheme.space8),
+              const SizedBox(width: 8),
               Text(
                 dateFormat.format(comment.createdAt),
-                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                style: AppTheme.mono(fontSize: 10, color: AppTheme.textMuted),
               ),
               const Spacer(),
               if (_editingCommentId == comment.id) ...[
@@ -456,7 +491,7 @@ class _RequirementDetailPanelState
                     color: AppTheme.statusPassed,
                   ),
                 ),
-                const SizedBox(width: AppTheme.space12),
+                const SizedBox(width: 12),
                 InkWell(
                   onTap: () {
                     setState(() {
@@ -483,7 +518,7 @@ class _RequirementDetailPanelState
                     color: AppTheme.textMuted,
                   ),
                 ),
-                const SizedBox(width: AppTheme.space12),
+                const SizedBox(width: 12),
                 InkWell(
                   onTap: () {
                     ref
@@ -510,12 +545,12 @@ class _RequirementDetailPanelState
                 isDense: true,
                 contentPadding: EdgeInsets.all(8),
               ),
-              style: const TextStyle(fontSize: 13),
+              style: AppTheme.sans(fontSize: 13),
             )
           else
             Text(
               comment.text,
-              style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary, height: 1.4),
+              style: AppTheme.sans(fontSize: 13, color: AppTheme.textPrimary, height: 1.5),
             ),
         ],
       ),
@@ -524,7 +559,7 @@ class _RequirementDetailPanelState
 
   Widget _buildCommentInput(String reqId) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusInput),
@@ -538,40 +573,41 @@ class _RequirementDetailPanelState
               controller: _commentController,
               minLines: 1,
               maxLines: 4,
-              decoration: const InputDecoration(
-                hintText: 'Thêm ghi chú review mới...',
-                hintStyle: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+              decoration: InputDecoration(
+                hintText: 'Add reviewer note...',
+                hintStyle: AppTheme.sans(fontSize: 12, color: AppTheme.textMuted),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 fillColor: Colors.transparent,
                 isDense: true,
-                contentPadding: EdgeInsets.zero,
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
               ),
-              style: const TextStyle(fontSize: 13),
+              style: AppTheme.sans(fontSize: 13),
             ),
           ),
-          const SizedBox(width: AppTheme.space8),
-          IconButton(
+          const SizedBox(width: 8),
+          OutlinedButton(
             onPressed: () {
               if (_commentController.text.trim().isEmpty) return;
               final newComment = ReviewComment(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
-                author: 'Me',
+                author: 'Reviewer',
                 text: _commentController.text.trim(),
                 createdAt: DateTime.now(),
               );
               ref.read(documentProvider.notifier).addComment(reqId, newComment);
               _commentController.clear();
             },
-            icon: const Icon(
-              LucideIcons.sendHorizonal,
-              color: AppTheme.primary,
-              size: 16,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              minimumSize: const Size(0, 28),
+              side: const BorderSide(color: AppTheme.border),
             ),
-            splashRadius: 16,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
+            child: Text(
+              'Add',
+              style: AppTheme.mono(fontSize: 11, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),

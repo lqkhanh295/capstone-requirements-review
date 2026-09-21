@@ -26,7 +26,7 @@ class AIReviewPanel extends ConsumerWidget {
     final docState = ref.watch(documentProvider);
 
     return Container(
-      width: 360,
+      width: 380,
       decoration: const BoxDecoration(
         color: AppTheme.surface,
         border: Border(
@@ -45,7 +45,7 @@ class AIReviewPanel extends ConsumerWidget {
 
           // Batch Progress Bar (if active)
           if (aiReviewState.isBatchAnalyzing)
-            _buildBatchProgressCard(context, ref, aiReviewState),
+            _buildBatchProgressBar(context, ref, aiReviewState),
 
           // Main Scrollable Body
           Expanded(
@@ -59,7 +59,11 @@ class AIReviewPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildPanelHeader(BuildContext context, WidgetRef ref, AIServiceConfig aiConfig) {
+  Widget _buildPanelHeader(
+    BuildContext context,
+    WidgetRef ref,
+    AIServiceConfig aiConfig,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppTheme.space16,
@@ -71,23 +75,19 @@ class AIReviewPanel extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(LucideIcons.shieldCheck, color: AppTheme.primary, size: 16),
-          const SizedBox(width: AppTheme.space8),
-          const Expanded(
-            child: Text(
-              'AI Review & Analysis',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
-              overflow: TextOverflow.ellipsis,
+          Text(
+            'AUTOMATED REVIEW',
+            style: AppTheme.mono(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: AppTheme.textPrimary,
             ),
           ),
-          const SizedBox(width: AppTheme.space8),
+          const Spacer(),
           // Provider Tag
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
               color: AppTheme.surfaceSubtle,
               borderRadius: BorderRadius.circular(AppTheme.radiusPill),
@@ -95,19 +95,23 @@ class AIReviewPanel extends ConsumerWidget {
             ),
             child: Text(
               aiConfig.provider.name.toUpperCase(),
-              style: const TextStyle(
+              style: AppTheme.mono(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textSecondary,
-                letterSpacing: 0.3,
+                letterSpacing: 0.4,
               ),
             ),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppTheme.space8),
           // Settings button
           IconButton(
             tooltip: 'Cài đặt AI Provider',
-            icon: const Icon(LucideIcons.settings, size: 15, color: AppTheme.textSecondary),
+            icon: const Icon(
+              LucideIcons.settings,
+              size: 15,
+              color: AppTheme.textSecondary,
+            ),
             onPressed: () => AISettingsDialog.show(context),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
@@ -121,104 +125,132 @@ class AIReviewPanel extends ConsumerWidget {
   Widget _buildErrorBanner(BuildContext context, WidgetRef ref, String error) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.space12),
-      margin: const EdgeInsets.all(AppTheme.space12),
-      decoration: BoxDecoration(
-        color: AppTheme.statusFailed.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.statusFailed.withValues(alpha: 0.25)),
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceSubtle,
+        border: Border(bottom: BorderSide(color: AppTheme.statusFailed)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(LucideIcons.alertCircle, color: AppTheme.statusFailed, size: 15),
+          Text(
+            '[ERR]',
+            style: AppTheme.mono(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.statusFailed,
+            ),
+          ),
           const SizedBox(width: AppTheme.space8),
           Expanded(
             child: Text(
               error,
-              style: const TextStyle(fontSize: 12, color: AppTheme.statusFailed),
+              style: AppTheme.sans(fontSize: 12, color: AppTheme.statusFailed),
             ),
           ),
           InkWell(
             onTap: () => ref.read(aiReviewProvider.notifier).clearMessages(),
-            child: const Icon(LucideIcons.x, size: 14, color: AppTheme.statusFailed),
+            child: const Icon(
+              LucideIcons.x,
+              size: 14,
+              color: AppTheme.statusFailed,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBatchProgressCard(BuildContext context, WidgetRef ref, AIReviewState state) {
-    final progress = state.batchTotal > 0 ? (state.batchCompleted / state.batchTotal) : 0.0;
+  Widget _buildBatchProgressBar(
+    BuildContext context,
+    WidgetRef ref,
+    AIReviewState state,
+  ) {
+    final progress =
+        state.batchTotal > 0 ? (state.batchCompleted / state.batchTotal) : 0.0;
 
     return Container(
-      margin: const EdgeInsets.all(AppTheme.space12),
-      padding: const EdgeInsets.all(AppTheme.space12),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.space16,
+        vertical: 10,
+      ),
+      decoration: const BoxDecoration(
         color: AppTheme.surfaceSubtle,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.border),
+        border: Border(bottom: BorderSide(color: AppTheme.border)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const SizedBox(
-                width: 12,
-                height: 12,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-              const SizedBox(width: AppTheme.space8),
               Text(
-                'Đang phân tích: ${state.batchCompleted}/${state.batchTotal}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                'BATCH AUDIT: ${state.batchCompleted} / ${state.batchTotal}',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                ),
               ),
               const Spacer(),
               TextButton(
-                onPressed: () => ref.read(aiReviewProvider.notifier).cancelBatchAnalysis(),
+                onPressed: () =>
+                    ref.read(aiReviewProvider.notifier).cancelBatchAnalysis(),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.zero,
-                  minimumSize: const Size(36, 18),
+                  minimumSize: const Size(40, 20),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text('Dừng', style: TextStyle(fontSize: 11, color: AppTheme.statusFailed)),
+                child: Text(
+                  '[ ABORT ]',
+                  style: AppTheme.mono(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.statusFailed,
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.space8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppTheme.borderLight,
-              color: AppTheme.primary,
-              minHeight: 4,
-            ),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: AppTheme.border,
+            color: AppTheme.primary,
+            minHeight: 2,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPanelBody(BuildContext context, WidgetRef ref, AIReviewState aiState) {
+  Widget _buildPanelBody(
+    BuildContext context,
+    WidgetRef ref,
+    AIReviewState aiState,
+  ) {
     if (requirement == null) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(AppTheme.space24),
+          padding: const EdgeInsets.all(AppTheme.space24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(LucideIcons.fileText, size: 24, color: AppTheme.textMuted),
-              SizedBox(height: AppTheme.space8),
               Text(
-                'Chưa chọn Requirement',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                'NO REQUIREMENT SELECTED',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: AppTheme.textMuted,
+                ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: AppTheme.space8),
               Text(
-                'Chọn một yêu cầu ở danh sách để xem đánh giá AI.',
+                'Select a specification from the index to inspect its automated quality audit.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                style: AppTheme.sans(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                ),
               ),
             ],
           ),
@@ -232,14 +264,27 @@ class AIReviewPanel extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.5),
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: AppTheme.space16),
             Text(
-              'Đang đánh giá 7 tiêu chí cho ${requirement!.id}...',
-              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+              'AUDITING ${requirement!.id}',
+              style: AppTheme.mono(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.6,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Evaluating 7 IEEE-830 quality dimensions...',
+              style: AppTheme.sans(fontSize: 12, color: AppTheme.textSecondary),
             ),
           ],
         ),
@@ -255,26 +300,51 @@ class AIReviewPanel extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(LucideIcons.shieldAlert, size: 28, color: AppTheme.textMuted),
-              const SizedBox(height: AppTheme.space12),
               Text(
-                'Chưa có đánh giá cho ${requirement!.id}',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-                textAlign: TextAlign.center,
+                'AUDIT PENDING: ${requirement!.id}',
+                style: AppTheme.mono(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                  color: AppTheme.textPrimary,
+                ),
               ),
-              const SizedBox(height: 6),
-              const Text(
-                'Nhấn nút bên dưới hoặc phím Ctrl + Enter để tiến hành đánh giá 7 tiêu chí chất lượng tự động.',
-                style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
+              const SizedBox(height: AppTheme.space8),
+              Text(
+                'No automated review has been recorded for this item yet.',
                 textAlign: TextAlign.center,
+                style: AppTheme.sans(
+                  fontSize: 12,
+                  color: AppTheme.textSecondary,
+                  height: 1.4,
+                ),
               ),
-              const SizedBox(height: AppTheme.space16),
-              ElevatedButton.icon(
+              const SizedBox(height: AppTheme.space20),
+              ElevatedButton(
                 onPressed: () {
-                  ref.read(aiReviewProvider.notifier).analyzeRequirement(requirement!);
+                  ref
+                      .read(aiReviewProvider.notifier)
+                      .analyzeRequirement(requirement!);
                 },
-                icon: const Icon(LucideIcons.play, size: 13),
-                label: const Text('Phân tích Requirement này'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.textPrimary,
+                  foregroundColor: AppTheme.surface,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                ),
+                child: Text(
+                  '[ Review requirement ]',
+                  style: AppTheme.mono(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
@@ -284,255 +354,378 @@ class AIReviewPanel extends ConsumerWidget {
 
     // Has Review Result
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.space12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // 1. Overall Score Card
-          _buildOverallScoreCard(review),
-          const SizedBox(height: AppTheme.space12),
+          // 1. Overall Score Section
+          _buildOverallScoreSection(review),
 
-          // 2. 7 Quality Dimensions Breakdown
-          _buildQualityDimensionsCard(review.scores),
-          const SizedBox(height: AppTheme.space12),
+          const Divider(height: 1, color: AppTheme.border),
 
-          // 3. Issues Found
-          _buildIssuesCard(review.issues),
-          const SizedBox(height: AppTheme.space12),
+          // 2. Technical Audit Grid (7 Quality Dimensions)
+          _buildQualityDimensionsSection(review.scores),
 
-          // 4. Suggested Revision
-          if (review.suggestedRevision != null && review.suggestedRevision!.isNotEmpty)
-            _buildSuggestedRevisionCard(context, ref, review.suggestedRevision!),
+          const Divider(height: 1, color: AppTheme.border),
+
+          // 3. Issues Found Section
+          _buildIssuesSection(review.issues),
+
+          // 4. Suggested Revision Section
+          if (review.suggestedRevision != null &&
+              review.suggestedRevision!.isNotEmpty) ...[
+            const Divider(height: 1, color: AppTheme.border),
+            _buildSuggestedRevisionSection(
+              context,
+              ref,
+              review.suggestedRevision!,
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildOverallScoreCard(RequirementReview review) {
+  Widget _buildOverallScoreSection(RequirementReview review) {
     Color scoreColor;
     String scoreGrade;
     if (review.overallScore >= 80) {
       scoreColor = AppTheme.statusPassed;
-      scoreGrade = 'Đạt chuẩn (Passed)';
+      scoreGrade = 'PASS';
     } else if (review.overallScore >= 50) {
       scoreColor = AppTheme.statusNeedsReview;
-      scoreGrade = 'Cần xem xét (Needs Review)';
+      scoreGrade = 'WARN';
     } else {
       scoreColor = AppTheme.statusFailed;
-      scoreGrade = 'Chưa đạt (Failed)';
+      scoreGrade = 'FAIL';
     }
 
     return Container(
       padding: const EdgeInsets.all(AppTheme.space16),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.border),
-      ),
+      color: AppTheme.surface,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-              color: scoreColor.withValues(alpha: 0.08),
-              border: Border.all(color: scoreColor.withValues(alpha: 0.25)),
-            ),
-            child: Center(
-              child: Text(
-                '${review.overallScore}',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: scoreColor,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'AUDIT SCORE',
+                style: AppTheme.mono(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textMuted,
+                  letterSpacing: 0.8,
                 ),
               ),
-            ),
+              const SizedBox(height: 4),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    '${review.overallScore}',
+                    style: AppTheme.mono(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    ' / 100',
+                    style: AppTheme.mono(
+                      fontSize: 14,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(width: AppTheme.space16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'OVERALL SCORE',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textMuted,
-                    letterSpacing: 0.6,
-                  ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: scoreColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  border: Border.all(color: scoreColor.withValues(alpha: 0.3)),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  scoreGrade,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: scoreColor,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: scoreColor,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      scoreGrade,
+                      style: AppTheme.mono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: scoreColor,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${review.issues.length} vấn đề được phát hiện',
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${review.issues.length} issues detected',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  color: AppTheme.textSecondary,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQualityDimensionsCard(QualityScores scores) {
+  Widget _buildQualityDimensionsSection(QualityScores scores) {
+    final dimensions = [
+      ('CLARITY', scores.clarity),
+      ('COMPLETENESS', scores.completeness),
+      ('TESTABILITY', scores.testability),
+      ('CONSISTENCY', scores.consistency),
+      ('FEASIBILITY', scores.feasibility),
+      ('AMBIGUITY', scores.ambiguity),
+      ('DUPLICATION', scores.duplication),
+    ];
+
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space14),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.border),
-      ),
+      padding: const EdgeInsets.all(AppTheme.space16),
+      color: AppTheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(LucideIcons.barChart3, size: 15, color: AppTheme.primary),
-              SizedBox(width: AppTheme.space8),
               Text(
-                '7 Tiêu chí chất lượng (FR-013)',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                'QUALITY AUDIT GRID',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
                   color: AppTheme.textPrimary,
+                ),
+              ),
+              Text(
+                'IEEE-830',
+                style: AppTheme.mono(
+                  fontSize: 10,
+                  color: AppTheme.textMuted,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppTheme.space12),
-          _buildCriteriaProgress('Clarity (Độ rõ ràng)', scores.clarity),
-          _buildCriteriaProgress('Completeness (Đầy đủ)', scores.completeness),
-          _buildCriteriaProgress('Testability (Khả năng kiểm thử)', scores.testability),
-          _buildCriteriaProgress('Consistency (Tính nhất quán)', scores.consistency),
-          _buildCriteriaProgress('Feasibility (Tính khả thi)', scores.feasibility),
-          _buildCriteriaProgress('Ambiguity (Tính không mơ hồ)', scores.ambiguity),
-          _buildCriteriaProgress('Duplication (Không trùng lặp)', scores.duplication),
+          // Technical Audit Grid Table
+          Table(
+            columnWidths: const {
+              0: FlexColumnWidth(4),
+              1: FlexColumnWidth(2),
+              2: FlexColumnWidth(2),
+            },
+            children: [
+              TableRow(
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: AppTheme.border)),
+                ),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      'CRITERION',
+                      style: AppTheme.mono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textMuted,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      'SCORE',
+                      textAlign: TextAlign.center,
+                      style: AppTheme.mono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textMuted,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      'STATUS',
+                      textAlign: TextAlign.right,
+                      style: AppTheme.mono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textMuted,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              for (final d in dimensions) _buildAuditGridRow(d.$1, d.$2),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCriteriaProgress(String label, int score) {
-    Color barColor;
+  TableRow _buildAuditGridRow(String name, int score) {
+    Color statusColor;
+    String statusLabel;
     if (score >= 80) {
-      barColor = AppTheme.statusPassed;
+      statusColor = AppTheme.statusPassed;
+      statusLabel = 'PASS';
     } else if (score >= 50) {
-      barColor = AppTheme.statusNeedsReview;
+      statusColor = AppTheme.statusNeedsReview;
+      statusLabel = 'WARN';
     } else {
-      barColor = AppTheme.statusFailed;
+      statusColor = AppTheme.statusFailed;
+      statusLabel = 'FAIL';
     }
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return TableRow(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppTheme.borderLight)),
+      ),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(
+            name,
+            style: AppTheme.mono(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Text(
+            '$score',
+            textAlign: TextAlign.center,
+            style: AppTheme.mono(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 7),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+              Container(
+                width: 5,
+                height: 5,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: statusColor,
+                ),
+              ),
+              const SizedBox(width: 5),
               Text(
-                '$score/100',
-                style: TextStyle(
+                statusLabel,
+                style: AppTheme.mono(
                   fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: barColor,
+                  fontWeight: FontWeight.w700,
+                  color: statusColor,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 3),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: score / 100,
-              backgroundColor: AppTheme.surfaceSubtle,
-              color: barColor,
-              minHeight: 4,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildIssuesCard(List<ReviewIssue> issues) {
+  Widget _buildIssuesSection(List<ReviewIssue> issues) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space14),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.border),
-      ),
+      padding: const EdgeInsets.all(AppTheme.space16),
+      color: AppTheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(LucideIcons.alertTriangle, size: 15, color: AppTheme.statusNeedsReview),
-              const SizedBox(width: AppTheme.space8),
-              const Text(
-                'Danh sách vấn đề (Issues)',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              Text(
+                'ISSUES DETECTED',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: AppTheme.space8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
                   color: issues.isEmpty
-                      ? AppTheme.statusPassed.withValues(alpha: 0.08)
-                      : AppTheme.statusFailed.withValues(alpha: 0.08),
+                      ? AppTheme.surfaceSubtle
+                      : AppTheme.statusFailed.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusPill),
                   border: Border.all(
                     color: issues.isEmpty
-                        ? AppTheme.statusPassed.withValues(alpha: 0.2)
-                        : AppTheme.statusFailed.withValues(alpha: 0.2),
+                        ? AppTheme.border
+                        : AppTheme.statusFailed.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
                   '${issues.length}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: issues.isEmpty ? AppTheme.statusPassed : AppTheme.statusFailed,
+                  style: AppTheme.mono(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: issues.isEmpty
+                        ? AppTheme.textMuted
+                        : AppTheme.statusFailed,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppTheme.space12),
           if (issues.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(AppTheme.space12),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceSubtle,
-                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-                border: Border.all(color: AppTheme.border),
-              ),
-              child: const Row(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
                 children: [
-                  Icon(LucideIcons.check, size: 15, color: AppTheme.statusPassed),
-                  SizedBox(width: AppTheme.space8),
-                  Expanded(
-                    child: Text(
-                      'Không phát hiện lỗi chất lượng nghiêm trọng nào.',
-                      style: TextStyle(fontSize: 12, color: AppTheme.statusPassed),
+                  const Icon(
+                    LucideIcons.check,
+                    size: 14,
+                    color: AppTheme.statusPassed,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'No specification issues detected.',
+                    style: AppTheme.sans(
+                      fontSize: 12,
+                      color: AppTheme.statusPassed,
                     ),
                   ),
                 ],
@@ -543,76 +736,63 @@ class AIReviewPanel extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: issues.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 6),
+              separatorBuilder: (context, index) =>
+                  const Divider(height: 12, color: AppTheme.borderLight),
               itemBuilder: (context, index) {
                 final issue = issues[index];
                 Color sevColor;
+                String sevTag;
                 switch (issue.severity) {
                   case IssueSeverity.high:
                     sevColor = AppTheme.statusFailed;
+                    sevTag = 'HIGH';
                     break;
                   case IssueSeverity.medium:
                     sevColor = AppTheme.statusNeedsReview;
+                    sevTag = 'MED';
                     break;
                   case IssueSeverity.low:
                     sevColor = AppTheme.severityLow;
+                    sevTag = 'LOW';
                     break;
                 }
 
-                return Container(
-                  padding: const EdgeInsets.all(AppTheme.space10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surfaceSubtle,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-                    border: Border.all(color: AppTheme.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: sevColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: sevColor.withValues(alpha: 0.25)),
-                            ),
-                            child: Text(
-                              issue.severity.label.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: sevColor,
-                                letterSpacing: 0.3,
-                              ),
-                            ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '[$sevTag]',
+                          style: AppTheme.mono(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: sevColor,
                           ),
-                          const SizedBox(width: AppTheme.space8),
-                          Expanded(
-                            child: Text(
-                              issue.type,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.textPrimary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        issue.description,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                          height: 1.35,
                         ),
+                        const SizedBox(width: AppTheme.space8),
+                        Expanded(
+                          child: Text(
+                            issue.type,
+                            style: AppTheme.sans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      issue.description,
+                      style: AppTheme.sans(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                        height: 1.45,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -621,40 +801,45 @@ class AIReviewPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildSuggestedRevisionCard(BuildContext context, WidgetRef ref, String suggestedText) {
+  Widget _buildSuggestedRevisionSection(
+    BuildContext context,
+    WidgetRef ref,
+    String suggestedText,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space14),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        border: Border.all(color: AppTheme.border),
-      ),
+      padding: const EdgeInsets.all(AppTheme.space16),
+      color: AppTheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(LucideIcons.fileCheck2, size: 15, color: AppTheme.primary),
-              const SizedBox(width: AppTheme.space8),
-              const Text(
-                'Đề xuất cải tiến (Suggestion)',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              Text(
+                'PROPOSED REVISION',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
                   color: AppTheme.textPrimary,
                 ),
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(LucideIcons.copy, size: 14, color: AppTheme.textSecondary),
-                tooltip: 'Sao chép',
-                splashRadius: 16,
+                icon: const Icon(
+                  LucideIcons.copy,
+                  size: 14,
+                  color: AppTheme.textSecondary,
+                ),
+                tooltip: 'Copy to clipboard',
+                splashRadius: 14,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: suggestedText));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Đã sao chép văn bản đề xuất vào Clipboard')),
+                    const SnackBar(
+                      content: Text('Copied revision to clipboard'),
+                    ),
                   );
                 },
               ),
@@ -662,37 +847,44 @@ class AIReviewPanel extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.all(AppTheme.space10),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(AppTheme.space12),
+            decoration: const BoxDecoration(
               color: AppTheme.surfaceSubtle,
-              borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-              border: Border.all(color: AppTheme.border),
+              border: Border(
+                left: BorderSide(color: AppTheme.primary, width: 2),
+              ),
             ),
             child: Text(
               suggestedText,
-              style: const TextStyle(
+              style: AppTheme.sans(
                 fontSize: 12,
                 color: AppTheme.textPrimary,
-                height: 1.45,
+                height: 1.5,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppTheme.space12),
           Align(
             alignment: Alignment.centerRight,
-            child: ElevatedButton.icon(
-              onPressed: () => _confirmApplySuggestion(context, ref, suggestedText),
+            child: ElevatedButton(
+              onPressed: () =>
+                  _confirmApplySuggestion(context, ref, suggestedText),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                backgroundColor: AppTheme.textPrimary,
+                foregroundColor: AppTheme.surface,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                 ),
                 elevation: 0,
               ),
-              icon: const Icon(LucideIcons.checkCheck, size: 13),
-              label: const Text('Apply suggestion', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+              child: Text(
+                '[ Apply revision ]',
+                style: AppTheme.mono(fontSize: 11, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ],
@@ -700,37 +892,51 @@ class AIReviewPanel extends ConsumerWidget {
     );
   }
 
-  void _confirmApplySuggestion(BuildContext context, WidgetRef ref, String suggestedText) {
+  void _confirmApplySuggestion(
+    BuildContext context,
+    WidgetRef ref,
+    String suggestedText,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusDialog)),
-        title: const Row(
-          children: [
-            Icon(LucideIcons.helpCircle, color: AppTheme.primary, size: 18),
-            SizedBox(width: 8),
-            Text('Xác nhận áp dụng đề xuất', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-          ],
+        backgroundColor: AppTheme.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusDialog),
+          side: const BorderSide(color: AppTheme.border),
+        ),
+        title: Text(
+          'APPLY PROPOSED REVISION',
+          style: AppTheme.mono(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.6,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Bạn có chắc chắn muốn thay thế mô tả hiện tại của Requirement bằng nội dung đề xuất từ AI không?',
-              style: TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+            Text(
+              'Replace the current requirement description with the proposed revision?',
+              style: AppTheme.sans(fontSize: 13, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppTheme.surfaceSubtle,
-                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-                border: Border.all(color: AppTheme.border),
+                border: Border(
+                  left: BorderSide(color: AppTheme.primary, width: 2),
+                ),
               ),
               child: Text(
                 suggestedText,
-                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.textPrimary),
+                style: AppTheme.sans(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: AppTheme.textPrimary,
+                ),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -740,16 +946,35 @@ class AIReviewPanel extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy'),
+            child: Text(
+              'CANCEL',
+              style: AppTheme.mono(fontSize: 12, color: AppTheme.textSecondary),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               if (requirement != null) {
-                ref.read(aiReviewProvider.notifier).applySuggestedRevision(requirement!.id, suggestedText);
+                ref
+                    .read(aiReviewProvider.notifier)
+                    .applySuggestedRevision(requirement!.id, suggestedText);
               }
             },
-            child: const Text('Xác nhận áp dụng'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+              ),
+            ),
+            child: Text(
+              'APPLY',
+              style: AppTheme.mono(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -774,32 +999,66 @@ class AIReviewPanel extends ConsumerWidget {
       child: Row(
         children: [
           Expanded(
-            child: OutlinedButton.icon(
-              onPressed: (!hasDoc || aiState.isAnalyzing || aiState.isBatchAnalyzing)
-                  ? null
-                  : () {
-                      ref.read(aiReviewProvider.notifier).analyzeAllRequirements();
-                    },
+            child: OutlinedButton(
+              onPressed:
+                  (!hasDoc || aiState.isAnalyzing || aiState.isBatchAnalyzing)
+                      ? null
+                      : () {
+                          ref
+                              .read(aiReviewProvider.notifier)
+                              .analyzeAllRequirements();
+                        },
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 9),
+                side: const BorderSide(color: AppTheme.border),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10),
               ),
-              icon: const Icon(LucideIcons.layers, size: 14),
-              label: Text('Batch AI ($reqCount)', style: const TextStyle(fontSize: 12)),
+              child: Text(
+                '[ Batch review ($reqCount) ]',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: (!hasDoc ||
+                          aiState.isAnalyzing ||
+                          aiState.isBatchAnalyzing)
+                      ? AppTheme.textMuted
+                      : AppTheme.textPrimary,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: AppTheme.space8),
           Expanded(
-            child: ElevatedButton.icon(
-              onPressed: (requirement == null || aiState.isAnalyzing || aiState.isBatchAnalyzing)
+            child: ElevatedButton(
+              onPressed: (requirement == null ||
+                      aiState.isAnalyzing ||
+                      aiState.isBatchAnalyzing)
                   ? null
                   : () {
-                      ref.read(aiReviewProvider.notifier).analyzeRequirement(requirement!);
+                      ref
+                          .read(aiReviewProvider.notifier)
+                          .analyzeRequirement(requirement!);
                     },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 9),
+                backgroundColor: AppTheme.textPrimary,
+                foregroundColor: AppTheme.surface,
+                disabledBackgroundColor: AppTheme.surfaceSubtle,
+                disabledForegroundColor: AppTheme.textMuted,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10),
               ),
-              icon: const Icon(LucideIcons.play, size: 14),
-              label: const Text('Phân tích (Ctrl+↵)', style: TextStyle(fontSize: 12)),
+              child: Text(
+                '[ Review ]',
+                style: AppTheme.mono(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],

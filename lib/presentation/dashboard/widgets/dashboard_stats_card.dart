@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/models.dart';
 
@@ -30,16 +29,16 @@ class DashboardStatsCard extends StatelessWidget {
     }
   }
 
-  IconData get statusIcon {
+  String get statusTag {
     switch (status) {
       case ReviewStatus.passed:
-        return LucideIcons.checkCircle2;
+        return 'PASSED';
       case ReviewStatus.needsReview:
-        return LucideIcons.alertTriangle;
+        return 'NEEDS REVIEW';
       case ReviewStatus.failed:
-        return LucideIcons.xCircle;
+        return 'FAILED';
       case ReviewStatus.notReviewed:
-        return LucideIcons.helpCircle;
+        return 'PENDING';
     }
   }
 
@@ -59,77 +58,61 @@ class DashboardStatsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top Row: Icon & Percentage Badge
+            // Top Row: Status Tag & Percentage
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Icon(
-                    statusIcon,
-                    color: statusColor,
-                    size: 15,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
-                  ),
-                  child: Text(
-                    '${percentage.toStringAsFixed(1)}%',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: statusColor,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: statusColor,
+                      ),
                     ),
+                    const SizedBox(width: 6),
+                    Text(
+                      statusTag,
+                      style: AppTheme.mono(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: statusColor,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '${percentage.toStringAsFixed(1)}%',
+                  style: AppTheme.mono(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textSecondary,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
 
-            // Middle: Count
+            // Middle: Big Mono Count
             Text(
               '$count',
-              style: const TextStyle(
-                fontSize: 26,
+              style: AppTheme.mono(
+                fontSize: 28,
                 fontWeight: FontWeight.w700,
                 color: AppTheme.textPrimary,
                 height: 1.0,
               ),
             ),
-            const SizedBox(height: 4),
-
-            // Label
-            Text(
-              status.label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 10),
 
             // Progress Bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: percentage > 0 ? (percentage / 100).clamp(0.0, 1.0) : 0.0,
-                backgroundColor: AppTheme.surfaceSubtle,
-                valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                minHeight: 4,
-              ),
+            LinearProgressIndicator(
+              value: percentage > 0 ? (percentage / 100).clamp(0.0, 1.0) : 0.0,
+              backgroundColor: AppTheme.borderLight,
+              valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+              minHeight: 2,
             ),
           ],
         ),

@@ -8,6 +8,8 @@ class Document {
   final int fileSize;
   final DateTime importedAt;
   final List<Requirement> requirements;
+  final String? rawContent;
+  final List<String> rawLines;
 
   const Document({
     required this.id,
@@ -17,7 +19,17 @@ class Document {
     required this.fileSize,
     required this.importedAt,
     this.requirements = const [],
+    this.rawContent,
+    this.rawLines = const [],
   });
+
+  List<String> get lines {
+    if (rawLines.isNotEmpty) return rawLines;
+    if (rawContent != null && rawContent!.isNotEmpty) {
+      return rawContent!.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
+    }
+    return const [];
+  }
 
   Document copyWith({
     String? id,
@@ -27,6 +39,8 @@ class Document {
     int? fileSize,
     DateTime? importedAt,
     List<Requirement>? requirements,
+    String? rawContent,
+    List<String>? rawLines,
   }) {
     return Document(
       id: id ?? this.id,
@@ -36,10 +50,15 @@ class Document {
       fileSize: fileSize ?? this.fileSize,
       importedAt: importedAt ?? this.importedAt,
       requirements: requirements ?? this.requirements,
+      rawContent: rawContent ?? this.rawContent,
+      rawLines: rawLines ?? this.rawLines,
     );
   }
 
   factory Document.fromJson(Map<String, dynamic> json) {
+    final rawTxt = json['rawContent'] as String?;
+    final rawLinesList = (json['rawLines'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [];
+
     return Document(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
@@ -53,6 +72,8 @@ class Document {
               ?.map((e) => Requirement.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      rawContent: rawTxt,
+      rawLines: rawLinesList,
     );
   }
 
@@ -64,5 +85,7 @@ class Document {
     'fileSize': fileSize,
     'importedAt': importedAt.toIso8601String(),
     'requirements': requirements.map((e) => e.toJson()).toList(),
+    if (rawContent != null) 'rawContent': rawContent,
+    if (rawLines.isNotEmpty) 'rawLines': rawLines,
   };
 }

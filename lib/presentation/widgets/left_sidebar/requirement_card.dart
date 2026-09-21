@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/models.dart';
 
@@ -37,32 +36,31 @@ class _RequirementCardState extends State<RequirementCard> {
       case ReviewStatus.failed:
         return AppTheme.statusFailed;
       case ReviewStatus.notReviewed:
-        return AppTheme.statusNotReviewed;
+        return AppTheme.textMuted;
     }
   }
 
-  IconData _getStatusIcon() {
+  String _getStatusLabel() {
     switch (widget.status) {
       case ReviewStatus.passed:
-        return LucideIcons.checkCircle2;
+        return 'PASSED';
       case ReviewStatus.needsReview:
-        return LucideIcons.alertTriangle;
+        return 'NEEDS REVIEW';
       case ReviewStatus.failed:
-        return LucideIcons.xCircle;
+        return 'FAILED';
       case ReviewStatus.notReviewed:
-        return LucideIcons.helpCircle;
+        return 'OPEN';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor();
-    final cardBg = widget.isSelected
+    final statusLabel = _getStatusLabel();
+
+    final itemBg = widget.isSelected
         ? AppTheme.surfaceSubtle
-        : (_isHovering ? AppTheme.surfaceHover : AppTheme.surface);
-    final borderColor = _isHovering && !widget.isSelected
-        ? const Color(0xFFC5CAD3)
-        : AppTheme.border;
+        : (_isHovering ? AppTheme.surfaceHover : Colors.transparent);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -70,111 +68,90 @@ class _RequirementCardState extends State<RequirementCard> {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-          child: Container(
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-              border: Border.all(color: borderColor, width: 1),
+        child: Container(
+          decoration: BoxDecoration(
+            color: itemBg,
+            border: Border(
+              bottom: const BorderSide(color: AppTheme.border, width: 0.8),
+              left: widget.isSelected
+                  ? const BorderSide(color: AppTheme.primary, width: 3.0)
+                  : BorderSide.none,
             ),
-            child: Stack(
-              children: [
-                // Signature 3px vertical accent bar on selected item (Rule 16)
-                if (widget.isSelected)
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 3,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primary,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(AppTheme.radiusCard),
-                          bottomLeft: Radius.circular(AppTheme.radiusCard),
-                        ),
-                      ),
+          ),
+          padding: EdgeInsets.fromLTRB(
+            widget.isSelected ? 13 : 16,
+            12,
+            16,
+            12,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Row: ID (Plex Mono) + Status indicator
+              Row(
+                children: [
+                  Text(
+                    widget.id,
+                    style: AppTheme.mono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: widget.isSelected ? AppTheme.primary : AppTheme.textPrimary,
+                      letterSpacing: 0.5,
                     ),
                   ),
-
-                // Card content
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const Spacer(),
+                  // Subtle dot status
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Status + ID + Issue Count
-                      Row(
-                        children: [
-                          Icon(
-                            _getStatusIcon(),
-                            color: statusColor,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 8),
-                          // ID Pill
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceSubtle,
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: AppTheme.border),
-                            ),
-                            child: Text(
-                              widget.id,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.textSecondary,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          if (widget.issueCount > 0)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.statusFailed,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${widget.issueCount}',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.statusFailed,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Title
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
-                          fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: widget.isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+                      Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          shape: BoxShape.circle,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        statusLabel,
+                        style: AppTheme.mono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ],
                   ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              // Requirement Title (Plex Sans)
+              Text(
+                widget.title,
+                style: AppTheme.sans(
+                  fontSize: 13,
+                  height: 1.35,
+                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: widget.isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (widget.issueCount > 0) ...[
+                const SizedBox(height: 6),
+                Text(
+                  '${widget.issueCount} ${widget.issueCount == 1 ? "ISSUE" : "ISSUES"}',
+                  style: AppTheme.mono(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.statusFailed,
+                    letterSpacing: 0.4,
+                  ),
                 ),
               ],
-            ),
+            ],
           ),
         ),
       ),

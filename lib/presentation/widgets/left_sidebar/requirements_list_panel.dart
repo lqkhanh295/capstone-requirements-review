@@ -17,7 +17,7 @@ class RequirementsListPanel extends ConsumerStatefulWidget {
 class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  String _selectedTab = 'All';
+  String _selectedFilter = 'ALL'; // ALL, OPEN, ISSUES, RESOLVED
 
   @override
   void dispose() {
@@ -62,14 +62,16 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
           req.title.toLowerCase().contains(query);
       if (!matchesSearch) return false;
 
-      switch (_selectedTab) {
-        case 'Review':
-          return req.status == ReviewStatus.needsReview || 
-                 (req.review != null && req.review!.overallScore < 80 && req.review!.overallScore >= 50);
-        case 'Failed':
+      switch (_selectedFilter) {
+        case 'OPEN':
+          return req.status == ReviewStatus.notReviewed;
+        case 'ISSUES':
           return req.status == ReviewStatus.failed ||
-                 (req.review != null && req.review!.overallScore < 50);
-        case 'All':
+              req.status == ReviewStatus.needsReview ||
+              (req.review != null && req.review!.issues.isNotEmpty);
+        case 'RESOLVED':
+          return req.status == ReviewStatus.passed;
+        case 'ALL':
         default:
           return true;
       }
@@ -82,6 +84,14 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
     final allReqs = docState.document?.requirements ?? [];
     final filteredReqs = _getFilteredRequirements(allReqs);
     final selectedReq = docState.selectedRequirement;
+
+    final allCount = allReqs.length;
+    final openCount = allReqs.where((r) => r.status == ReviewStatus.notReviewed).length;
+    final issuesCount = allReqs.where((r) =>
+        r.status == ReviewStatus.failed ||
+        r.status == ReviewStatus.needsReview ||
+        (r.review != null && r.review!.issues.isNotEmpty)).length;
+    final resolvedCount = allReqs.where((r) => r.status == ReviewStatus.passed).length;
 
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
@@ -98,7 +108,7 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
         child: Focus(
           autofocus: true,
           child: Container(
-            width: 290,
+            width: 300,
             decoration: const BoxDecoration(
               color: AppTheme.background,
               border: Border(
@@ -108,10 +118,27 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(filteredReqs.length),
-                _buildSearchBar(),
-                _buildTabFilters(),
+                // Top Editorial Section: DOCUMENTS
+                _buildDocumentsSection(docState.document),
                 const Divider(height: 1),
+
+                // Review Status Filters
+                _buildReviewFilterSection(
+                  allCount: allCount,
+                  openCount: openCount,
+                  issuesCount: issuesCount,
+                  resolvedCount: resolvedCount,
+                ),
+                const Divider(height: 1),
+
+                // Search Bar
+                _buildSearchBar(),
+                const Divider(height: 1),
+
+                // Requirements Section Title
+                _buildSectionHeader('REQUIREMENTS', filteredReqs.length),
+
+                // Requirements List
                 Expanded(child: _buildList(filteredReqs, selectedReq)),
               ],
             ),
@@ -121,35 +148,151 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
     );
   }
 
-  Widget _buildHeader(int count) {
+  Widget _buildDocumentsSection(Document? doc) {
+    final docName = doc?.name ?? 'No document loaded';
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'DOCUMENTS',
+            style: AppTheme.mono(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textSecondary,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                '01',
+                style: AppTheme.mono(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  docName,
+                  style: AppTheme.sans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewFilterSection({
+    required int allCount,
+    required int openCount,
+    required int issuesCount,
+    required int resolvedCount,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'REVIEW',
+            style: AppTheme.mono(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textSecondary,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _buildFilterRow('ALL', allCount),
+          _buildFilterRow('OPEN', openCount),
+          _buildFilterRow('ISSUES', issuesCount),
+          _buildFilterRow('RESOLVED', resolvedCount),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterRow(String label, int count) {
+    final isSelected = _selectedFilter == label;
+
+    return InkWell(
+      onTap: () => setState(() => _selectedFilter = label),
+      hoverColor: AppTheme.surfaceHover,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            if (isSelected)
+              Container(
+                width: 4,
+                height: 4,
+                margin: const EdgeInsets.only(right: 6),
+                decoration: const BoxDecoration(
+                  color: AppTheme.primary,
+                  shape: BoxShape.circle,
+                ),
+              )
+            else
+              const SizedBox(width: 10),
+            Text(
+              label,
+              style: AppTheme.sans(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '$count',
+              style: AppTheme.mono(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? AppTheme.textPrimary : AppTheme.textMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, int count) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: AppTheme.surfaceSubtle,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'REQUIREMENTS',
-            style: TextStyle(
-              fontSize: 11,
+          Text(
+            title,
+            style: AppTheme.mono(
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: AppTheme.textSecondary,
               letterSpacing: 0.8,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceSubtle,
-              borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-              border: Border.all(color: AppTheme.border),
-            ),
-            child: Text(
-              '$count',
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
+          Text(
+            '$count',
+            style: AppTheme.mono(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textSecondary,
             ),
           ),
         ],
@@ -159,68 +302,25 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       child: TextField(
         controller: _searchController,
         focusNode: _searchFocusNode,
         onChanged: (_) => setState(() {}),
-        style: const TextStyle(
-          fontSize: 13,
+        style: AppTheme.sans(
+          fontSize: 12,
           color: AppTheme.textPrimary,
         ),
         decoration: InputDecoration(
-          hintText: 'Search requirements... (Ctrl+F)',
-          hintStyle: const TextStyle(
+          hintText: 'Filter requirements... (Ctrl+F)',
+          hintStyle: AppTheme.sans(
             fontSize: 12,
             color: AppTheme.textMuted,
           ),
-          prefixIcon: const Icon(LucideIcons.search, size: 15, color: AppTheme.textMuted),
+          prefixIcon: const Icon(LucideIcons.search, size: 14, color: AppTheme.textSecondary),
           isDense: true,
           fillColor: AppTheme.surface,
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabFilters() {
-    final tabs = ['All', 'Review', 'Failed'];
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
-      child: Container(
-        padding: const EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: AppTheme.surfaceSubtle,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-          border: Border.all(color: AppTheme.border, width: 0.5),
-        ),
-        child: Row(
-          children: tabs.map((tab) => Expanded(child: _buildTab(tab))).toList(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTab(String title) {
-    final isSelected = _selectedTab == title;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTab = title),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton - 2),
-          border: isSelected ? Border.all(color: AppTheme.border, width: 0.5) : null,
-        ),
-        child: Text(
-          title,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
         ),
       ),
     );
@@ -228,31 +328,23 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
 
   Widget _buildList(List<Requirement> reqs, Requirement? selectedReq) {
     if (reqs.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(LucideIcons.searchX, size: 24, color: AppTheme.textMuted),
-              SizedBox(height: 8),
-              Text(
-                'Không tìm thấy yêu cầu nào',
-                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
-              ),
-            ],
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'No matching requirements',
+            style: AppTheme.mono(fontSize: 11, color: AppTheme.textMuted),
           ),
         ),
       );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.all(12),
+
+    return ListView.builder(
       itemCount: reqs.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final req = reqs[index];
         final isSelected = selectedReq?.id == req.id;
-        
+
         int issueCount = 0;
         if (req.review != null && req.review!.issues.isNotEmpty) {
           issueCount = req.review!.issues.length;

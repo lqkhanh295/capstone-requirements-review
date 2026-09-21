@@ -21,7 +21,6 @@ import 'presentation/widgets/file_drop_zone.dart';
 import 'presentation/widgets/requirement_detail_panel.dart';
 import 'presentation/widgets/left_sidebar/requirements_list_panel.dart';
 
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -138,51 +137,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             appBar: AppBar(
               backgroundColor: AppTheme.surface,
               elevation: 0,
-              toolbarHeight: 48,
-              title: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(LucideIcons.fileSearch,
-                        color: AppTheme.primary, size: 18),
-                    const SizedBox(width: AppTheme.space8),
-                    const Text(
-                      'Capstone Requirements Review',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
-                      ),
+              toolbarHeight: 46,
+              titleSpacing: AppTheme.space16,
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'CAPSTONE REVIEW',
+                    style: AppTheme.mono(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                      color: AppTheme.textPrimary,
                     ),
-                    if (docState.hasDocument) ...[
-                      const SizedBox(width: AppTheme.space16),
-                      _buildNavTab(
-                        index: 0,
-                        icon: LucideIcons.layoutGrid,
-                        label: 'Workspace',
-                      ),
-                      const SizedBox(width: 4),
-                      _buildNavTab(
-                        index: 1,
-                        icon: LucideIcons.barChart3,
-                        label: 'Dashboard',
-                      ),
-                    ],
+                  ),
+                  if (docState.hasDocument) ...[
+                    const SizedBox(width: AppTheme.space24),
+                    _buildNavTab(index: 0, label: 'Workspace'),
+                    _buildNavTab(index: 1, label: 'Dashboard'),
                   ],
-                ),
+                ],
               ),
               actions: [
                 if (docState.hasDocument) ...[
                   // Quick Export Button
-                  ElevatedButton.icon(
+                  ElevatedButton(
                     onPressed: () =>
                         ExportReportDialog.show(context, docState.document!),
-                    icon: const Icon(LucideIcons.download, size: 14),
-                    label: const Text('Export (Ctrl+E)', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppTheme.textPrimary,
+                      foregroundColor: AppTheme.surface,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
@@ -193,46 +177,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       elevation: 0,
                     ),
+                    child: Text(
+                      '[ Export (Ctrl+E) ]',
+                      style: AppTheme.mono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: AppTheme.space8),
                 ],
                 // AI Status Pill
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 9),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: InkWell(
                     onTap: () => AISettingsDialog.show(context),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusButton),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.surfaceSubtle,
                         borderRadius:
-                            BorderRadius.circular(AppTheme.radiusPill),
+                            BorderRadius.circular(AppTheme.radiusButton),
                         border: Border.all(color: AppTheme.border),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(LucideIcons.bot,
-                              size: 13, color: AppTheme.textSecondary),
-                          const SizedBox(width: 5),
                           ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 150),
+                            constraints: const BoxConstraints(maxWidth: 160),
                             child: Text(
-                              'AI: ${aiConfig.provider.label}',
+                              'ENGINE: ${aiConfig.provider.name.toUpperCase()}',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                              style: AppTheme.mono(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
                                 color: AppTheme.textSecondary,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 3),
-                          const Icon(LucideIcons.chevronDown,
-                              size: 12, color: AppTheme.textMuted),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            LucideIcons.chevronDown,
+                            size: 12,
+                            color: AppTheme.textSecondary,
+                          ),
                         ],
                       ),
                     ),
@@ -240,7 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(width: AppTheme.space8),
                 if (docState.hasDocument) ...[
-                  OutlinedButton.icon(
+                  OutlinedButton(
                     onPressed: _pickNewDocument,
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: AppTheme.border),
@@ -253,10 +246,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             BorderRadius.circular(AppTheme.radiusButton),
                       ),
                     ),
-                    icon: const Icon(LucideIcons.folderOpen, size: 14),
-                    label: const Text('Mở tài liệu khác', style: TextStyle(fontSize: 12)),
+                    child: Text(
+                      '[ Open document ]',
+                      style: AppTheme.mono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: AppTheme.space12),
+                  const SizedBox(width: AppTheme.space16),
                 ],
               ],
               bottom: const PreferredSize(
@@ -277,53 +276,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   if (_isGlobalDragging)
                     Positioned.fill(
                       child: Container(
-                        color: AppTheme.primary.withValues(alpha: 0.12),
+                        color: AppTheme.surface.withValues(alpha: 0.95),
                         child: Center(
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 28,
-                              vertical: 18,
+                              horizontal: 32,
+                              vertical: 24,
                             ),
                             decoration: BoxDecoration(
                               color: AppTheme.surface,
                               borderRadius:
                                   BorderRadius.circular(AppTheme.radiusCard),
                               border:
-                                  Border.all(color: AppTheme.primary, width: 2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 20,
-                                  offset: Offset(0, 6),
-                                ),
-                              ],
+                                  Border.all(color: AppTheme.primary, width: 1.5),
                             ),
-                            child: const Row(
+                            child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(LucideIcons.fileUp,
-                                    color: AppTheme.primary, size: 28),
-                                SizedBox(width: 14),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Thả tệp SRS vào đây',
-                                      style: TextStyle(
-                                        color: AppTheme.textPrimary,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Hỗ trợ PDF, DOCX, TXT, Markdown',
-                                      style: TextStyle(
-                                        color: AppTheme.textSecondary,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
+                                const Icon(
+                                  LucideIcons.uploadCloud,
+                                  color: AppTheme.primary,
+                                  size: 24,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'RELEASE SPECIFICATION TO IMPORT',
+                                  style: AppTheme.mono(
+                                    color: AppTheme.primary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'PDF, DOCX, TXT, or Markdown',
+                                  style: AppTheme.sans(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 12,
+                                  ),
                                 ),
                               ],
                             ),
@@ -342,43 +333,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildNavTab({
     required int index,
-    required IconData icon,
     required String label,
   }) {
     final isSelected = _selectedTabIndex == index;
 
     return InkWell(
       onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(AppTheme.radiusButton),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 6,
+          horizontal: 14,
+          vertical: 14,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primarySoft
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          border: Border(
+            bottom: BorderSide(
+              color: isSelected ? AppTheme.primary : Colors.transparent,
+              width: 2,
+            ),
+          ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
-              ),
-            ),
-          ],
+        child: Text(
+          label.toUpperCase(),
+          style: AppTheme.mono(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+            letterSpacing: 0.6,
+          ),
         ),
       ),
     );
@@ -390,13 +371,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(strokeWidth: 3),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppTheme.textPrimary,
+              ),
+            ),
             const SizedBox(height: AppTheme.space16),
             Text(
-              state.loadingMessage ?? 'Đang xử lý tài liệu...',
-              style: const TextStyle(
+              state.loadingMessage ?? 'PROCESSING DOCUMENT SPECIFICATIONS...',
+              style: AppTheme.mono(
                 color: AppTheme.textSecondary,
-                fontSize: 14,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -409,34 +398,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppTheme.space32),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 680),
+            constraints: const BoxConstraints(maxWidth: 640),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (state.errorMessage != null) ...[
                   Container(
                     margin: const EdgeInsets.only(bottom: AppTheme.space24),
-                    padding: const EdgeInsets.all(AppTheme.space16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.statusFailed.withValues(alpha: 0.08),
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusMedium),
-                      border: Border.all(
-                        color: AppTheme.statusFailed.withValues(alpha: 0.3),
+                    padding: const EdgeInsets.all(AppTheme.space12),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.surfaceSubtle,
+                      border: Border(
+                        left: BorderSide(color: AppTheme.statusFailed, width: 2),
                       ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(LucideIcons.alertCircle,
-                            color: AppTheme.statusFailed, size: 20),
-                        const SizedBox(width: AppTheme.space12),
+                        Text(
+                          '[ERR]',
+                          style: AppTheme.mono(
+                            color: AppTheme.statusFailed,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.space8),
                         Expanded(
                           child: Text(
                             state.errorMessage!,
-                            style: const TextStyle(
+                            style: AppTheme.sans(
                               color: AppTheme.statusFailed,
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                           ),
                         ),
@@ -444,21 +437,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ],
-                const Text(
-                  'Nhập tài liệu yêu cầu (SRS)',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                Text(
+                  'CAPSTONE REQUIREMENTS AUDITOR',
+                  style: AppTheme.mono(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
                     color: AppTheme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Tải lên tài liệu phần mềm của bạn để tự động nhận diện phân đoạn và bóc tách các Requirements.',
-                  style: TextStyle(
+                const SizedBox(height: 8),
+                Text(
+                  'Upload software requirements documents (SRS) for automated extraction, IEEE-830 dimension auditing, and formal verification.',
+                  style: AppTheme.sans(
                     fontSize: 13,
                     color: AppTheme.textSecondary,
+                    height: 1.5,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -516,8 +511,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildDocumentHeader(Document doc) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.space20,
-        vertical: 10,
+        horizontal: AppTheme.space16,
+        vertical: 8,
       ),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
@@ -527,76 +522,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-            decoration: BoxDecoration(
-              color: AppTheme.primarySoft,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
-            ),
-            child: Text(
-              doc.fileType.toUpperCase(),
-              style: const TextStyle(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.w700,
-                fontSize: 10,
-                letterSpacing: 0.5,
-              ),
+          Text(
+            'SPEC:',
+            style: AppTheme.mono(
+              color: AppTheme.textMuted,
+              fontWeight: FontWeight.w700,
+              fontSize: 10,
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(width: AppTheme.space12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  doc.name,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  '${(doc.fileSize / 1024).toStringAsFixed(1)} KB • Đường dẫn: ${doc.filePath}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppTheme.textMuted,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          const SizedBox(width: AppTheme.space8),
+          Text(
+            doc.name,
+            style: AppTheme.sans(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
             ),
+            overflow: TextOverflow.ellipsis,
           ),
+          const SizedBox(width: AppTheme.space8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
             decoration: BoxDecoration(
               color: AppTheme.surfaceSubtle,
               borderRadius: BorderRadius.circular(AppTheme.radiusPill),
               border: Border.all(color: AppTheme.border),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(LucideIcons.listOrdered,
-                    size: 14, color: AppTheme.textSecondary),
-                const SizedBox(width: 5),
-                Text(
-                  '${doc.requirements.length} Requirements',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ],
+            child: Text(
+              doc.fileType.toUpperCase(),
+              style: AppTheme.mono(
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '${(doc.fileSize / 1024).toStringAsFixed(1)} KB',
+            style: AppTheme.mono(
+              fontSize: 11,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(width: AppTheme.space16),
+          Text(
+            '${doc.requirements.length} REQUIREMENTS',
+            style: AppTheme.mono(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
             ),
           ),
         ],
       ),
     );
   }
-
 }
