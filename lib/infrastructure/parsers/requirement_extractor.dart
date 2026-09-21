@@ -72,8 +72,25 @@ class RequirementExtractor {
             ? currentTitle!
             : (currentDescLines.isNotEmpty ? _extractTitleFromText(currentDescLines.first) : 'Requirement $id');
 
+        // Filter out table headers, border separators, and empty cell fragments
+        final cleanTitle = title.replaceAll(RegExp(r'[│─┌┐└┘├┤┬┴┼\|\-\+\s]'), '');
+        final lowerTitle = title.toLowerCase().trim();
+        final isPseudoHeader = cleanTitle.isEmpty ||
+            lowerTitle.contains('description / source context') ||
+            lowerTitle.contains('description/source context') ||
+            lowerTitle.contains('suggested revision') ||
+            lowerTitle.contains('detected issues');
+
+        if (isPseudoHeader) {
+          currentId = null;
+          currentTitle = null;
+          currentDescLines.clear();
+          currentType = section.inferredType;
+          return;
+        }
+
         final desc = currentDescLines.isNotEmpty
-            ? currentDescLines.join('\n').trim()
+            ? formatDescription(currentDescLines)
             : title;
 
         final sourceLoc = sourceName != null
@@ -228,6 +245,20 @@ class RequirementExtractor {
       description = parts.sublist(1).join(' - ');
     }
 
+    // Filter out table header rows or pseudo-columns
+    final cleanTitle = title.replaceAll(RegExp(r'[│─┌┐└┘├┤┬┴┼\|\-\+\s]'), '');
+    final lowerTitle = title.toLowerCase().trim();
+    if (cleanTitle.isEmpty ||
+        lowerTitle.contains('description / source context') ||
+        lowerTitle.contains('description/source context') ||
+        lowerTitle.contains('suggested revision') ||
+        lowerTitle.contains('detected issues') ||
+        lowerTitle == 'title' ||
+        lowerTitle == 'requirement' ||
+        lowerTitle == 'requirement id') {
+      return null;
+    }
+
     final reqType = _inferTypeFromPrefix(foundId, section.inferredType);
     final sourceLoc = sourceName != null
         ? '$sourceName (${section.title}, Row $lineNumber)'
@@ -241,6 +272,49 @@ class RequirementExtractor {
       sourceLocation: sourceLoc,
       status: ReviewStatus.notReviewed,
     );
+  }
+
+  /// Formats raw extracted lines into clean flowing sentences and paragraphs.
+  /// Merges accidental line breaks while preserving bullet lists and multi-paragraph spacing.
+  static String formatDescription(List<String> rawLines) {
+    if (rawLines.isEmpty) return '';
+
+    final List<String> paragraphs = [];
+    final StringBuffer currentParagraph = StringBuffer();
+
+    for (final rawLine in rawLines) {
+      final line = rawLine.trim();
+      if (line.isEmpty) {
+        if (currentParagraph.isNotEmpty) {
+          paragraphs.add(currentParagraph.toString().trim());
+          currentParagraph.clear();
+        }
+        continue;
+      }
+
+      final isBullet = RegExp(r'^(\*|-|\+|\u2022|\d+[\.\)])\s+').hasMatch(line);
+      if (isBullet) {
+        if (currentParagraph.isNotEmpty) {
+          paragraphs.add(currentParagraph.toString().trim());
+          currentParagraph.clear();
+        }
+        paragraphs.add(line);
+      } else {
+        if (currentParagraph.isNotEmpty) {
+          final cur = currentParagraph.toString();
+          if (!cur.endsWith(' ') && !cur.endsWith('\n')) {
+            currentParagraph.write(' ');
+          }
+        }
+        currentParagraph.write(line);
+      }
+    }
+
+    if (currentParagraph.isNotEmpty) {
+      paragraphs.add(currentParagraph.toString().trim());
+    }
+
+    return paragraphs.join('\n\n');
   }
 
   static List<Requirement> _extractFromRawLines(List<String> lines, {String? sourceName}) {

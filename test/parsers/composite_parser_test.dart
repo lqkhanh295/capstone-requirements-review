@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:capstone_requirements_review/infrastructure/parsers/composite_document_parser.dart';
+import 'package:capstone_requirements_review/infrastructure/parsers/requirement_extractor.dart';
 
 void main() {
   group('CompositeDocumentParser Tests', () {
@@ -42,7 +43,17 @@ The system shall extract requirements from 50-page documents within 3 seconds.
         expect(doc.requirements.isNotEmpty, isTrue);
         // Verify that parsed requirements have IDs
         expect(doc.requirements.any((r) => r.id.contains('REQ') || r.id.contains('FR')), isTrue);
+        // Verify no pseudo-header rows like "Description / source context" got added as requirements
+        expect(doc.requirements.any((r) => r.title.toLowerCase().contains('description / source context')), isFalse);
       }
+    });
+
+    test('formatDescription joins soft-wrapped lines and preserves bullets', () {
+      final input = ['Drag', 'and', 'Drop', '', '- Item 1', '- Item 2'];
+      final formatted = RequirementExtractor.formatDescription(input);
+      expect(formatted, contains('Drag and Drop'));
+      expect(formatted, contains('- Item 1'));
+      expect(formatted, contains('- Item 2'));
     });
   });
 }

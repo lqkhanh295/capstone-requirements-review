@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../domain/models/models.dart';
+import '../../infrastructure/parsers/requirement_extractor.dart';
 import '../providers/document_provider.dart';
 
 class RequirementDetailPanel extends ConsumerStatefulWidget {
@@ -225,6 +226,12 @@ class _RequirementDetailPanelState
   }
 
   Widget _buildDescription(Requirement req) {
+    // If description has fragmented newlines (e.g. from PDF text extraction), format smoothly into paragraphs
+    final rawLines = req.description.split('\n');
+    final displayText = (rawLines.length > 2)
+        ? RequirementExtractor.formatDescription(rawLines)
+        : (req.description.isNotEmpty ? req.description : 'Không có mô tả chi tiết.');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,9 +254,7 @@ class _RequirementDetailPanelState
             border: Border.all(color: AppTheme.border),
           ),
           child: Text(
-            req.description.isNotEmpty
-                ? req.description
-                : 'Không có mô tả chi tiết.',
+            displayText,
             style: const TextStyle(
               fontSize: 13,
               color: AppTheme.textPrimary,
