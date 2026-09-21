@@ -29,18 +29,11 @@ class QualityScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.space20),
+      padding: const EdgeInsets.all(AppTheme.space16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
         border: Border.all(color: AppTheme.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,13 +44,13 @@ class QualityScoreCard extends StatelessWidget {
             children: [
               const Row(
                 children: [
-                  Icon(LucideIcons.award, color: AppTheme.primary, size: 20),
+                  Icon(LucideIcons.award, color: AppTheme.primary, size: 16),
                   SizedBox(width: AppTheme.space8),
                   Text(
                     'Overall Quality Score',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
@@ -65,38 +58,38 @@ class QualityScoreCard extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.space12,
-                  vertical: AppTheme.space4,
+                  horizontal: 10,
+                  vertical: 3,
                 ),
                 decoration: BoxDecoration(
-                  color: scoreColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                  border: Border.all(color: scoreColor.withOpacity(0.3)),
+                  color: scoreColor.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  border: Border.all(color: scoreColor.withValues(alpha: 0.25)),
                 ),
                 child: Text(
                   scoreGrade,
                   style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                     color: scoreColor,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.space20),
+          const SizedBox(height: AppTheme.space16),
 
           // Main Score Content Area
           Row(
             children: [
-              // Circular Gauge / Indicator Box
+              // Clean Score Card Box
               Container(
-                width: 110,
-                height: 110,
+                width: 90,
+                height: 90,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: scoreColor.withOpacity(0.06),
-                  border: Border.all(color: scoreColor.withOpacity(0.2), width: 3),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+                  color: scoreColor.withValues(alpha: 0.08),
+                  border: Border.all(color: scoreColor.withValues(alpha: 0.25)),
                 ),
                 child: Center(
                   child: Column(
@@ -105,17 +98,17 @@ class QualityScoreCard extends StatelessWidget {
                       Text(
                         '$overallScore',
                         style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
                           color: scoreColor,
                           height: 1.0,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       const Text(
                         '/ 100',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: AppTheme.textMuted,
                         ),
@@ -124,7 +117,7 @@ class QualityScoreCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppTheme.space24),
+              const SizedBox(width: AppTheme.space20),
 
               // Metrics breakdown list
               Expanded(
@@ -134,7 +127,7 @@ class QualityScoreCard extends StatelessWidget {
                     final scoreVal = entry.value;
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: AppTheme.space8),
+                      padding: const EdgeInsets.only(bottom: 6),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -144,7 +137,7 @@ class QualityScoreCard extends StatelessWidget {
                               Text(
                                 metricName,
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w500,
                                   color: AppTheme.textSecondary,
                                 ),
@@ -152,19 +145,19 @@ class QualityScoreCard extends StatelessWidget {
                               Text(
                                 '${scoreVal.toStringAsFixed(0)}%',
                                 style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                   color: AppTheme.textPrimary,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(2),
                             child: LinearProgressIndicator(
                               value: (scoreVal / 100).clamp(0.0, 1.0),
-                              backgroundColor: AppTheme.borderLight,
+                              backgroundColor: AppTheme.surfaceSubtle,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 scoreVal >= 80
                                     ? AppTheme.statusPassed
@@ -172,7 +165,7 @@ class QualityScoreCard extends StatelessWidget {
                                         ? AppTheme.statusNeedsReview
                                         : AppTheme.statusFailed,
                               ),
-                              minHeight: 6,
+                              minHeight: 4,
                             ),
                           ),
                         ],

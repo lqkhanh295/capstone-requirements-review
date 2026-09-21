@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
 import '../widgets/left_sidebar/requirements_list_panel.dart';
 
 class WorkspaceScreen extends StatelessWidget {

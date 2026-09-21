@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -24,10 +23,24 @@ class ExportResult {
   });
 }
 
+class _PdfGenerationPayload {
+  final Document document;
+  final PdfFontBytes? fontBytes;
+
+  const _PdfGenerationPayload({
+    required this.document,
+    this.fontBytes,
+  });
+}
+
 class ReportExportService {
   /// Generate PDF report in background isolate (No UI Freeze)
   static Future<Uint8List> generatePdfAsync(Document document) async {
-    return await compute(_buildPdfIsolate, document);
+    final fontBytes = await PDFReportGenerator.loadFonts();
+    return await compute(
+      _buildPdfIsolate,
+      _PdfGenerationPayload(document: document, fontBytes: fontBytes),
+    );
   }
 
   /// Generate CSV report string in background isolate (No UI Freeze)
@@ -36,8 +49,11 @@ class ReportExportService {
   }
 
   /// Top-level or static function for PDF compute isolate
-  static Future<Uint8List> _buildPdfIsolate(Document document) async {
-    return await PDFReportGenerator.generatePDF(document);
+  static Future<Uint8List> _buildPdfIsolate(_PdfGenerationPayload payload) async {
+    return await PDFReportGenerator.generatePDF(
+      payload.document,
+      fontBytes: payload.fontBytes,
+    );
   }
 
   /// Top-level or static function for CSV compute isolate
@@ -59,14 +75,12 @@ class ReportExportService {
 
       String? savePath = customPath;
 
-      if (savePath == null) {
-        savePath = await FilePicker.platform.saveFile(
-          dialogTitle: isPdf ? 'Export PDF Report' : 'Export CSV Data',
-          fileName: defaultFileName,
-          type: FileType.custom,
-          allowedExtensions: isPdf ? ['pdf'] : ['csv'],
-        );
-      }
+      savePath ??= await FilePicker.platform.saveFile(
+        dialogTitle: isPdf ? 'Export PDF Report' : 'Export CSV Data',
+        fileName: defaultFileName,
+        type: FileType.custom,
+        allowedExtensions: isPdf ? ['pdf'] : ['csv'],
+      );
 
       if (savePath == null) {
         return const ExportResult(

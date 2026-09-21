@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../../theme/app_theme.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/models.dart';
 import '../../providers/document_provider.dart';
 import 'requirement_card.dart';
@@ -55,9 +55,10 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
   }
 
   List<Requirement> _getFilteredRequirements(List<Requirement> allReqs) {
-    final query = _searchController.text.toLowerCase();
+    final query = _searchController.text.toLowerCase().trim();
     return allReqs.where((req) {
-      final matchesSearch = req.id.toLowerCase().contains(query) ||
+      final matchesSearch = query.isEmpty ||
+          req.id.toLowerCase().contains(query) ||
           req.title.toLowerCase().contains(query);
       if (!matchesSearch) return false;
 
@@ -97,7 +98,7 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
         child: Focus(
           autofocus: true,
           child: Container(
-            width: 300,
+            width: 290,
             decoration: const BoxDecoration(
               color: AppTheme.background,
               border: Border(
@@ -110,7 +111,7 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
                 _buildHeader(filteredReqs.length),
                 _buildSearchBar(),
                 _buildTabFilters(),
-                const Divider(),
+                const Divider(height: 1),
                 Expanded(child: _buildList(filteredReqs, selectedReq)),
               ],
             ),
@@ -122,26 +123,31 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
 
   Widget _buildHeader(int count) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          const Text(
             'REQUIREMENTS',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
               color: AppTheme.textSecondary,
-              letterSpacing: 1.2,
+              letterSpacing: 0.8,
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: AppTheme.border,
-              borderRadius: BorderRadius.circular(12),
+              color: AppTheme.surfaceSubtle,
+              borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+              border: Border.all(color: AppTheme.border),
             ),
             child: Text(
               '$count',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
               ),
             ),
@@ -153,22 +159,25 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: TextField(
         controller: _searchController,
         focusNode: _searchFocusNode,
         onChanged: (_) => setState(() {}),
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        style: const TextStyle(
+          fontSize: 13,
           color: AppTheme.textPrimary,
         ),
         decoration: InputDecoration(
-          hintText: 'Search (Ctrl+F)',
-          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppTheme.textSecondary.withValues(alpha: 0.7),
+          hintText: 'Search requirements... (Ctrl+F)',
+          hintStyle: const TextStyle(
+            fontSize: 12,
+            color: AppTheme.textMuted,
           ),
-          prefixIcon: const Icon(LucideIcons.search, size: 16, color: AppTheme.textSecondary),
+          prefixIcon: const Icon(LucideIcons.search, size: 15, color: AppTheme.textMuted),
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+          fillColor: AppTheme.surface,
+          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
         ),
       ),
     );
@@ -177,12 +186,12 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
   Widget _buildTabFilters() {
     final tabs = ['All', 'Review', 'Failed'];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceHover,
-          borderRadius: BorderRadius.circular(AppTheme.borderRadius),
+          color: AppTheme.surfaceSubtle,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           border: Border.all(color: AppTheme.border, width: 0.5),
         ),
         child: Row(
@@ -197,28 +206,20 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = title),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 5),
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.surface : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.borderRadius - 2),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  )
-                ]
-              : [],
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton - 2),
+          border: isSelected ? Border.all(color: AppTheme.border, width: 0.5) : null,
         ),
         child: Text(
           title,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          style: TextStyle(
+            fontSize: 12,
             color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            letterSpacing: 0,
           ),
         ),
       ),
@@ -228,24 +229,33 @@ class _RequirementsListPanelState extends ConsumerState<RequirementsListPanel> {
   Widget _buildList(List<Requirement> reqs, Requirement? selectedReq) {
     if (reqs.isEmpty) {
       return const Center(
-        child: Text(
-          'Không tìm thấy yêu cầu nào.',
-          style: TextStyle(color: AppTheme.textSecondary),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.searchX, size: 24, color: AppTheme.textMuted),
+              SizedBox(height: 8),
+              Text(
+                'Không tìm thấy yêu cầu nào',
+                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+              ),
+            ],
+          ),
         ),
       );
     }
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       itemCount: reqs.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final req = reqs[index];
         final isSelected = selectedReq?.id == req.id;
         
-        // Calculate issue count from AI review if available
         int issueCount = 0;
         if (req.review != null && req.review!.issues.isNotEmpty) {
-           issueCount = req.review!.issues.length;
+          issueCount = req.review!.issues.length;
         }
 
         return RequirementCard(

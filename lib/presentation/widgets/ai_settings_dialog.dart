@@ -75,11 +75,12 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
     final aiReviewState = ref.watch(aiReviewProvider);
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLarge)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusDialog)),
+      backgroundColor: AppTheme.surface,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
+        constraints: const BoxConstraints(maxWidth: 480),
         child: Padding(
-          padding: const EdgeInsets.all(AppTheme.space24),
+          padding: const EdgeInsets.all(AppTheme.space20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,26 +89,27 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(AppTheme.space8),
+                    padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      color: AppTheme.primarySoft,
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(LucideIcons.sparkles, color: AppTheme.primary, size: 20),
+                    child: const Icon(LucideIcons.cpu, color: AppTheme.primary, size: 18),
                   ),
                   const SizedBox(width: AppTheme.space12),
                   const Text(
                     'Cấu hình AI Provider',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: AppTheme.textPrimary,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(LucideIcons.x, size: 18),
+                    icon: const Icon(LucideIcons.x, size: 16, color: AppTheme.textMuted),
                     onPressed: () => Navigator.of(context).pop(),
+                    splashRadius: 16,
                   ),
                 ],
               ),
@@ -117,17 +119,18 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
               const Text(
                 'AI Provider',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppTheme.space8),
+              const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppTheme.space12),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusInput),
                   border: Border.all(color: AppTheme.border),
+                  color: AppTheme.surfaceSubtle,
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<AIProviderType>(
@@ -136,7 +139,7 @@ class _AISettingsDialogState extends ConsumerState<AISettingsDialog> {
                     items: AIProviderType.values.map((provider) {
                       return DropdownMenuItem(
                         value: provider,
-                        child: Text(provider.label),
+                        child: Text(provider.label, style: const TextStyle(fontSize: 13)),
                       );
                     }).toList(),
                     onChanged: _onProviderChanged,

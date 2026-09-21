@@ -186,5 +186,48 @@ void main() {
       final pdfData = await ReportExportService.generatePdfAsync(testDocument);
       expect(pdfData.length, greaterThan(0));
     });
+
+    test('PDFReportGenerator properly renders Unicode, Vietnamese and special characters', () async {
+      final unicodeDoc = Document(
+        id: 'DOC-UNICODE-001',
+        name: 'Báo_Cáo_Đánh_Giá_SRS.pdf',
+        filePath: '/export/doc.pdf',
+        fileType: 'pdf',
+        fileSize: 2048,
+        importedAt: DateTime.now(),
+        requirements: const [
+          Requirement(
+            id: 'REQ-VN-001',
+            title: '│ Đăng nhập hệ thống │ Hợp lệ │',
+            description: 'Người dùng có thể đăng nhập bằng email & mật khẩu – tỷ lệ 220–240 px • bảo mật cao.',
+            type: RequirementType.functional,
+            status: ReviewStatus.passed,
+            review: RequirementReview(
+              overallScore: 92,
+              scores: QualityScores(
+                clarity: 90,
+                completeness: 95,
+                testability: 90,
+                consistency: 90,
+                feasibility: 95,
+              ),
+              issues: [
+                ReviewIssue(
+                  type: 'Tiêu chuẩn',
+                  severity: IssueSeverity.low,
+                  description: 'Cần ghi rõ độ dài mật khẩu (tối thiểu 8 ký tự).',
+                ),
+              ],
+              suggestedRevision: 'Hệ thống cần yêu cầu mật khẩu tối thiểu 8 ký tự.',
+            ),
+          ),
+        ],
+      );
+
+      final pdfBytes = await PDFReportGenerator.generatePDF(unicodeDoc);
+      expect(pdfBytes, isNotNull);
+      expect(pdfBytes.length, greaterThan(0));
+      expect(String.fromCharCodes(pdfBytes.take(5)), contains('%PDF-'));
+    });
   });
 }
