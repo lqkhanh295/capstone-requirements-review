@@ -46,16 +46,48 @@ class QualityScores {
   final int feasibility;
   final int ambiguity;
   final int duplication;
+  final Map<String, int> dynamicScores;
 
   const QualityScores({
-    required this.clarity,
-    required this.completeness,
-    required this.testability,
-    required this.consistency,
-    required this.feasibility,
+    this.clarity = 80,
+    this.completeness = 80,
+    this.testability = 80,
+    this.consistency = 80,
+    this.feasibility = 80,
     this.ambiguity = 85,
     this.duplication = 90,
+    this.dynamicScores = const {},
   });
+
+  int getScore(String criterionId) {
+    if (dynamicScores.containsKey(criterionId)) {
+      return dynamicScores[criterionId]!;
+    }
+    switch (criterionId.toLowerCase()) {
+      case 'clarity':
+        return clarity;
+      case 'completeness':
+      case 'crud_completeness':
+        return completeness;
+      case 'testability':
+        return testability;
+      case 'consistency':
+      case 'clarity_consistency':
+        return consistency;
+      case 'feasibility':
+      case 'feasibility_security':
+        return feasibility;
+      case 'ambiguity':
+        return ambiguity;
+      case 'duplication':
+        return duplication;
+      default:
+        if (dynamicScores.isNotEmpty) {
+          return dynamicScores.values.reduce((a, b) => a + b) ~/ dynamicScores.length;
+        }
+        return (clarity + completeness + testability) ~/ 3;
+    }
+  }
 
   QualityScores copyWith({
     int? clarity,
@@ -65,6 +97,7 @@ class QualityScores {
     int? feasibility,
     int? ambiguity,
     int? duplication,
+    Map<String, int>? dynamicScores,
   }) {
     return QualityScores(
       clarity: clarity ?? this.clarity,
@@ -74,18 +107,35 @@ class QualityScores {
       feasibility: feasibility ?? this.feasibility,
       ambiguity: ambiguity ?? this.ambiguity,
       duplication: duplication ?? this.duplication,
+      dynamicScores: dynamicScores ?? this.dynamicScores,
     );
   }
 
   factory QualityScores.fromJson(Map<String, dynamic> json) {
+    final dyn = <String, int>{};
+    for (final entry in json.entries) {
+      if (entry.value is num) {
+        dyn[entry.key] = (entry.value as num).toInt();
+      }
+    }
+
+    final clarityVal = (json['clarity'] as num?)?.toInt() ?? dyn['clarity_consistency'] ?? dyn['clarity'] ?? 80;
+    final compVal = (json['completeness'] as num?)?.toInt() ?? dyn['crud_completeness'] ?? dyn['completeness'] ?? 80;
+    final testVal = (json['testability'] as num?)?.toInt() ?? dyn['testability'] ?? 80;
+    final consVal = (json['consistency'] as num?)?.toInt() ?? dyn['clarity_consistency'] ?? dyn['consistency'] ?? 80;
+    final feasVal = (json['feasibility'] as num?)?.toInt() ?? dyn['feasibility_security'] ?? dyn['feasibility'] ?? 80;
+    final ambVal = (json['ambiguity'] as num?)?.toInt() ?? dyn['ambiguity'] ?? 85;
+    final dupVal = (json['duplication'] as num?)?.toInt() ?? dyn['duplication'] ?? 90;
+
     return QualityScores(
-      clarity: (json['clarity'] as num?)?.toInt() ?? 0,
-      completeness: (json['completeness'] as num?)?.toInt() ?? 0,
-      testability: (json['testability'] as num?)?.toInt() ?? 0,
-      consistency: (json['consistency'] as num?)?.toInt() ?? 0,
-      feasibility: (json['feasibility'] as num?)?.toInt() ?? 0,
-      ambiguity: (json['ambiguity'] as num?)?.toInt() ?? 85,
-      duplication: (json['duplication'] as num?)?.toInt() ?? 90,
+      clarity: clarityVal,
+      completeness: compVal,
+      testability: testVal,
+      consistency: consVal,
+      feasibility: feasVal,
+      ambiguity: ambVal,
+      duplication: dupVal,
+      dynamicScores: dyn,
     );
   }
 
@@ -97,6 +147,7 @@ class QualityScores {
     'feasibility': feasibility,
     'ambiguity': ambiguity,
     'duplication': duplication,
+    if (dynamicScores.isNotEmpty) 'dynamicScores': dynamicScores,
   };
 }
 
